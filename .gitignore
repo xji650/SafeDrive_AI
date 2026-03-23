@@ -1,0 +1,45 @@
+# --- IDE & Build Systems ---
+.idea/
+*.iml
+.gradle/
+build/
+captures/
+local.properties
+.cxx/
+*.externalNativeBuild
+.kotlin/
+
+# --- Seguridad y Credenciales ---
+# Firebase y firmas de la APK
+**/google-services.json
+*.jks
+*.keystore
+# Claves de la API de DGT 3.0 y otros secretos
+secrets.properties
+.secrets/
+
+# --- Inteligencia Artificial (TFLite) ---
+# Archivos temporales del entrenamiento del modelo
+**/ml/training_data/
+**/ml/checkpoints/
+*.tflite.json
+# Descomenta la siguiente línea si prefieres descargar el modelo binario bajo demanda
+# *.tflite
+
+# --- Persistencia Local y EDR ---
+# Bases de datos de prueba locales (Room/SQLite)
+*.db
+*.db-shm
+*.db-wal
+# Carpeta para las exportaciones JSON/PDF del EDR
+/edr_exports/
+
+# --- Android Auto & OS Specific ---
+# Archivos del emulador de Android Auto
+.android/avd/*.lock
+.DS_Store
+Thumbs.db
+
+# --- Testing ---
+/test-results/
+/espresso-reports/
