@@ -1,0 +1,195 @@
+\documentclass[11pt, a4paper]{article}
+
+% --- PAQUETES DE IDIOMA Y CODIFICACIÓN ---
+\usepackage[spanish]{babel}
+% Manual fix para asegurar el término "Tabla"
+\addto\captionsspanish{\def\tablename{Tabla}\def\listtablename{Índice de tablas}}
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+
+% --- PAQUETES DE DISEÑO Y GRÁFICOS ---
+\usepackage[top=2.5cm, bottom=2.5cm, left=2.5cm, right=2.5cm]{geometry}
+\usepackage{graphicx}
+\usepackage{booktabs}
+\usepackage{float}
+\usepackage{hyperref}
+\usepackage{amsmath}
+\usepackage{listings}
+\usepackage{caption}
+\usepackage{xcolor}
+\usepackage{tabularx}
+
+% --- ESTILO DE PÁRRAFO Y LISTAS ---
+\usepackage{parskip}
+\usepackage{setspace}
+\onehalfspacing
+\usepackage{enumitem}
+
+% --- CONFIGURACIÓN DE LISTINGS ---
+\lstset{
+    basicstyle=\ttfamily\small,
+    backgroundcolor=\color{white},
+    breaklines=true,
+    frame=single,
+    framesep=5pt,
+    rulecolor=\color{black!30},
+    numbers=left,
+    numbersep=10pt,
+    numberstyle=\tiny\color{gray},
+    xleftmargin=1.5cm,
+    framexleftmargin=0.5cm,
+    captionpos=b,
+    showstringspaces=false,
+    columns=fullflexible,
+}
+
+% --- CONFIGURACIÓN DE HIPERVÍNCULOS ---
+\hypersetup{
+    colorlinks=true,
+    linkcolor=blue,
+    filecolor=magenta,
+    urlcolor=blue,
+    pdftitle={Entrega 1A - SafeDrive AI},
+}
+
+\begin{document}
+
+% --- PORTADA ---
+    \begin{titlepage}
+        \centering
+        \vspace*{1cm}
+        {\Huge \textbf{SafeDrive AI}} \\
+        \vspace{0.5cm}
+        {\Large Sistema de Seguridad Vial Inteligente mediante Fusión Sensorial} \\
+        \vspace{2cm}
+
+        \textbf{Asignatura:} PLATAFORMES EN XARXA (105030-2526) \\
+        \textbf{Entrega:} 1A - Definición Inicial del Proyecto \\
+
+        \vspace{3cm}
+
+        \framebox{\parbox{0.7\textwidth}{\centering
+        \vspace{2cm}
+        \textbf{PROTOCOLO ECALL POR SOFTWARE} \\
+        \small\textit{Detección Multisensorial \& Integración DGT 3.0} \\
+        \vspace{1cm}
+        [Logo del Proyecto]
+        \vspace{2cm}
+        }}
+
+        \vfill
+        \textbf{Autor:} XiaoLong Ji \\
+        \textbf{Fecha:} \today
+    \end{titlepage}
+
+    \tableofcontents
+    \newpage
+
+% --- 1. TÍTULO DEL PROYECTO ---
+    \section{Título del proyecto}
+    El proyecto se denomina oficialmente \textbf{SafeDrive AI}. Este nombre identifica la propuesta como una solución de conducción asistida basada en Inteligencia Artificial, centrada en la seguridad pasiva y la respuesta inmediata ante emergencias.
+
+% --- 2. DESCRIPCIÓN DEL PROYECTO ---
+    \section{Descripción del proyecto}
+
+    \subsection{Objetivo de la aplicación}
+    El objetivo principal es transformar un smartphone Android convencional en un sistema avanzado de asistencia al conductor (ADAS) capaz de monitorizar la seguridad del trayecto de forma autónoma. La aplicación busca reducir los tiempos de rescate mediante la automatización de la llamada de emergencia (\textit{eCall}) y la prevención de accidentes mediante el análisis de fatiga en tiempo real.
+
+    \subsection{Problema que resuelve}
+    SafeDrive AI aborda la vulnerabilidad de los conductores ante accidentes en solitario o en zonas aisladas donde no es posible pedir ayuda manualmente. Mitiga el impacto de la fatiga del conductor y democratiza el acceso a sistemas de seguridad de alta gama para vehículos antiguos que carecen de conectividad nativa, conectando al usuario con la plataforma de datos de la DGT 3.0.
+
+    \subsection{Público objetivo}
+    \begin{itemize}
+        \item Conductores particulares con vehículos sin sistemas de seguridad conectada de fábrica.
+        \item Profesionales del transporte y gestores de flotas que requieren monitorización de seguridad sin inversión en hardware adicional.
+        \item Usuarios vulnerables (conductores noveles o personas mayores) cuyos familiares deseen una capa extra de protección y localización.
+    \end{itemize}
+
+% --- 3. SENSORES UTILIZADOS Y JUSTIFICACIÓN ---
+    \section{Sensores utilizados y justificación}
+    La fiabilidad del sistema se basa en una arquitectura de \textbf{Fusión Sensorial Pasiva} para garantizar precisión técnica con el mínimo consumo energético.
+
+    \begin{table}[H]
+        \centering
+        \caption{Matriz de sensores y justificación técnica.}
+        \small
+        \begin{tabularx}{\textwidth}{@{}l l X @{}}
+        \toprule
+        \textbf{Sensor} & \textbf{Eje de Datos} & \textbf{Justificación Técnica} \\ \midrule
+        Acelerómetro & Lineal (G) & Detección de variaciones extremas de energía cinética (choques). \\
+        Giroscopio & Angular (rad/s) & Identificación de cambios de orientación (vuelcos o derrapes). \\
+        Micrófono & Acústico (dB) & Validación mediante picos acústicos de colisión para evitar falsos positivos. \\
+        GPS (GNSS) & Espacial & Registro de velocidad real y coordenadas exactas para los servicios de socorro. \\
+        Cámara Frontal & Visual & Análisis biométrico del parpadeo para detectar estados de somnolencia. \\
+        Luz Ambiental & Contextual & Ajuste del \textit{Dashboard} a modo nocturno para reducir la fatiga visual. \\ \bottomrule
+        \end{tabularx}
+    \end{table}
+
+% --- 4. DEFINICIÓN INICIAL DE LOS CASOS DE USO ---
+    \section{Definición inicial de los casos de uso}
+    \begin{itemize}
+        \item \textbf{CU-01 (Monitorización de Seguridad):} La app detecta el inicio del viaje y comienza a procesar los sensores inerciales en segundo plano.
+        \item \textbf{CU-02 (Detección de Colisión):} El sistema valida un impacto mediante la coincidencia de acelerómetro (G) y micrófono (dB).
+        \item \textbf{CU-03 (Protocolo de Alerta):} Ante un impacto confirmado y falta de respuesta del usuario, se envían alertas SMS/Email a contactos SOS.
+        \item \textbf{CU-04 (Notificación DGT 3.0):} Envío opcional de ubicación anónima a la plataforma de tráfico para alertar a otros conductores.
+        \item \textbf{CU-05 (Alerta de Fatiga):} El sistema emite un aviso sonoro si la cámara frontal detecta patrones de cierre de ojos prolongado.
+    \end{itemize}
+
+% --- 5. REQUISITOS FUNCIONALES ---
+    \section{Requisitos funcionales}
+    \begin{enumerate}[label=\textbf{RF-\arabic*}]
+    \item El sistema permitirá la gestión de un perfil con contactos SOS, póliza de seguro y datos médicos.
+    \item Implementación de lógica de detección de choque basada en umbrales de fuerza G y picos acústicos.
+    \item Visualización de un panel (\textit{Dashboard}) con telemetría en tiempo real y mapa interactivo.
+    \item Sistema de cuenta atrás de 30 segundos previa a la emisión de alertas externas.
+    \item Gestión de servicios de asistencia manual (botón de grúa) enviando ubicación y póliza.
+    \end{enumerate}
+
+% --- 6. REQUISITOS NO FUNCIONALES ---
+    \section{Requisitos no funcionales}
+    \begin{enumerate}[label=\textbf{RNF-\arabic*}]
+    \item \textbf{Privacidad:} Procesamiento local de audio y vídeo mediante \textit{Edge AI} sin almacenamiento en la nube.
+    \item \textbf{Eficiencia:} Optimización del uso de batería mediante la activación dinámica de sensores.
+    \item \textbf{Resiliencia:} Soporte para funcionamiento \textit{offline} y reintento de alertas al recuperar señal.
+    \item \textbf{Usabilidad:} Interfaz diseñada para evitar distracciones visuales (\textit{Safe-Touch}).
+    \end{enumerate}
+
+% --- 7. PLANIFICACIÓN INICIAL DEL PROYECTO (DIAGRAMA DE GANTT) ---
+    \section{Planificación inicial del proyecto (Diagrama de Gantt)}
+    El desarrollo se estima en un periodo de 3 meses (12 semanas) mediante metodología incremental.
+
+    \begin{table}[H]
+        \centering
+        \caption{Cronograma de planificación (12 semanas).}
+        \small
+        \begin{tabular}{@{}lp{10cm}c@{}}
+            \toprule
+            \textbf{Fase} & \textbf{Actividades Principales} & \textbf{Semanas} \\ \midrule
+            Análisis & Definición de requisitos, diseño de UI y arquitectura Firebase. & 1--2 \\
+            Desarrollo Core & Implementación de servicios en segundo plano y lectura de sensores. & 3--6 \\
+            Inteligencia AI & Integración de modelos TensorFlow Lite (Choque/Fatiga). & 7--9 \\
+            Conectividad & Sistema de alertas SOS, DGT 3.0, asistencia y pruebas finales. & 10--12 \\ \bottomrule
+        \end{tabular}
+    \end{table}
+
+% --- 8. ANÁLISIS DE VIABILIDAD ---
+    \section{Justificación Técnica y Viabilidad}
+    El proyecto SafeDrive AI se fundamenta en tres pilares técnicos que garantizan su viabilidad y robustez operativa en entornos reales:
+
+    \subsection{Arquitectura de Procesamiento Local (Edge AI)}
+    Para garantizar la viabilidad en términos de latencia y privacidad, la aplicación utiliza modelos de \textbf{TensorFlow Lite} ejecutados localmente. Esto permite que el análisis acústico del micrófono y el procesamiento visual de la cámara (detección de fatiga) se realicen sin necesidad de conexión a internet constante, reduciendo el consumo de ancho de banda y asegurando que los datos biométricos nunca abandonen el dispositivo, cumpliendo estrictamente con el RGPD.
+
+    \subsection{Estrategia de Mitigación Energética}
+    El principal riesgo técnico de una aplicación basada en sensores es el drenaje de batería. SafeDrive AI soluciona este problema mediante:
+    \begin{itemize}
+        \item \textbf{Muestreo Adaptativo:} El GPS opera en baja frecuencia durante trayectos estables y escala a alta precisión solo cuando el acelerómetro detecta patrones de movimiento vehicular mediante la \textit{ActivityRecognitionClient} de Google.
+        \item \textbf{Uso de Sensores de Bajo Consumo:} El sistema utiliza el \textit{Significant Motion Sensor} para "despertar" los módulos de mayor consumo solo cuando es estrictamente necesario.
+    \end{itemize}
+
+    \subsection{Persistencia y Resiliencia del Sistema}
+    Para asegurar que la aplicación no sea finalizada por el sistema operativo Android debido a su política de optimización de batería, se implementará un \textbf{Foreground Service} con una notificación de prioridad alta. Esto garantiza que la monitorización de sensores sea persistente incluso con la pantalla apagada. Además, la integración con \textbf{Firebase Cloud Messaging (FCM)} asegura una entrega de alertas SOS con latencia inferior a 2 segundos en condiciones normales de red.
+
+    \subsection{Viabilidad de Integración Externa}
+    La integración con \textbf{DGT 3.0} es viable mediante el uso de protocolos estándar JSON a través de su API pública de publicación de incidentes. Al ser una aplicación académica con base real, se simulará el \textit{endpoint} de producción, asegurando que el flujo de datos sea compatible con los estándares actuales de las plataformas de tráfico inteligente en España.
+
+\end{document}

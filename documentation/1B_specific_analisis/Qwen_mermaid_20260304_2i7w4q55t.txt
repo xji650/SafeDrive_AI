@@ -1,0 +1,61 @@
+flowchart LR
+    subgraph Firestore["🔥 FIREBASE FIRESTORE"]
+        
+        subgraph Users["users/"]
+            U1["{userId}/"]
+            U1 --> U2["profile/"]
+            U1 --> U3["vehiculos/{vehiculoId}/"]
+            U1 --> U4["contactosSOS/{contactoId}/"]
+            U1 --> U5["seguros/{seguroId}/"]
+            U1 --> U6["configuracion/"]
+        end
+        
+        subgraph Viajes["viajes/"]
+            V1["{viajeId}/"]
+            V1 --> V2["ruta: array<geoPoint>"]
+            V1 --> V3["telemetria: array"]
+        end
+        
+        subgraph Accidentes["accidentes/"]
+            AC1["{accidenteId}/"]
+            AC1 --> AC2["ubicacion: geoPoint"]
+            AC1 --> AC3["gravedad: string"]
+            AC1 --> AC4["estado_alertas: object"]
+        end
+        
+        subgraph EDR["edr_records/"]
+            E1["{accidenteId}/"]
+            E1 --> E2["telemetria: array<object>"]
+            E1 --> E3["persistido: boolean"]
+        end
+        
+        subgraph Alertas["alertas_112/"]
+            AL1["{accidenteId}/"]
+            AL1 --> AL2["estado: string"]
+            AL1 --> AL3["reintentos: number"]
+            AL1 --> AL4["respuesta: string"]
+        end
+    end
+    
+    subgraph Auth["🔐 FIREBASE AUTH"]
+        AU1[Authentication]
+        AU2[Email/Password]
+        AU3[Phone Auth]
+    end
+    
+    subgraph Storage["📦 FIREBASE STORAGE"]
+        ST1[EDR Exports]
+        ST2[Audio Evidence]
+        ST3[Fotos Parte]
+    end
+    
+    Users -->|Referencia| Viajes
+    Users -->|Referencia| Accidentes
+    Accidentes -->|1:1| EDR
+    Accidentes -->|1:1| Alertas
+    Auth -->|Autentica| Users
+    Storage -->|Archivos pesados| EDR
+    
+    style Firestore fill:#ffebee,stroke:#b71c1c,stroke-width:2px
+    style Auth fill:#e8f5e9,stroke:#1b5e20,stroke-width:2px
+    style Storage fill:#e3f2fd,stroke:#0d47a1,stroke-width:2px

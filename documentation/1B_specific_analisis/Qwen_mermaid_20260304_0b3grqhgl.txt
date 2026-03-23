@@ -1,0 +1,64 @@
+flowchart TB
+    subgraph Usuario["👤 USUARIO / CONDUCTOR"]
+        U1[Smartphone Android]
+        U2[Android Auto Display]
+    end
+    
+    subgraph App["📱 SAFEDRIVE AI APP"]
+        A1[UI Dashboard]
+        A2[Sensor Manager]
+        A3[IA Engine TFLite]
+        A4[EDR Module]
+        A5[SOS Protocol]
+        A6[Foreground Service]
+    end
+    
+    subgraph Sensores["🔧 SENSORES DEL DISPOSITIVO"]
+        S1[Acelerómetro]
+        S2[Giroscopio]
+        S3[Micrófono]
+        S4[GPS/GNSS]
+        S5[Luz Ambiental]
+    end
+    
+    subgraph Local["💾 ALMACENAMIENTO LOCAL"]
+        L1[SQLite/Room]
+        L2[EDR Buffer 30s]
+        L3[Config Usuario]
+    end
+    
+    subgraph Cloud["☁️ FIREBASE BACKEND"]
+        C1[Firestore DB]
+        C2[Firebase Auth]
+        C3[Cloud Messaging]
+        C4[Storage]
+    end
+    
+    subgraph Externos["🌐 SERVICIOS EXTERNOS"]
+        E1[112 Emergencias]
+        E2[SMS/WhatsApp]
+        E3[DGT 3.0 API]
+        E4[Aseguradora]
+    end
+    
+    Usuario -->|Interacción| App
+    Sensores -->|Datos en tiempo real| A2
+    A2 -->|Señales filtradas| A3
+    A3 -->|Impacto detectado| A5
+    A3 -->|Impacto detectado| A4
+    A4 -->|Persiste datos| L2
+    A5 -->|Llamada automática| E1
+    A5 -->|Notificación| E2
+    A5 -->|Publica incidente| E3
+    A1 -->|Sync| C1
+    A6 -->|Mantiene servicio activo| A2
+    A6 -->|Heartbeat| C1
+    L1 -->|Backup| C1
+    C3 -->|Push notifications| A1
+    
+    style Usuario fill:#e1f5fe,stroke:#01579b
+    style App fill:#fff3e0,stroke:#e65100
+    style Sensores fill:#e8f5e9,stroke:#1b5e20
+    style Local fill:#f3e5f5,stroke:#4a148c
+    style Cloud fill:#ffebee,stroke:#b71c1c
+    style Externos fill:#fff8e1,stroke:#f57f17

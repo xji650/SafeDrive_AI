@@ -1,0 +1,136 @@
+classDiagram
+    class Usuario {
+        -String idUsuario
+        -String nombre
+        -String email
+        -String telefono
+        -String plan
+        +registrar()
+        +actualizarPerfil()
+        +eliminarCuenta()
+    }
+    
+    class Vehiculo {
+        -String idVehiculo
+        -String matricula
+        -String marca
+        -String modelo
+        -int ano
+        +validarMatricula()
+        +obtenerDatos()
+    }
+    
+    class ContactoSOS {
+        -String idContacto
+        -String nombre
+        -String telefono
+        -int prioridad
+        +enviarSMS()
+        +enviarWhatsApp()
+    }
+    
+    class Viaje {
+        -String idViaje
+        -Date fechaInicio
+        -Date fechaFin
+        -float distanciaKm
+        -boolean tieneIncidente
+        +iniciarViaje()
+        +finalizarViaje()
+        +obtenerRuta()
+    }
+    
+    class Accidente {
+        -String idAccidente
+        -String gravedad
+        -float latitud
+        -float longitud
+        -Date fecha
+        -boolean llamada112
+        +registrarAccidente()
+        +obtenerUbicacion()
+    }
+    
+    class SensorManager {
+        -Acelerometro acelerometro
+        -Giroscopio giroscopio
+        -Microfono microfono
+        -GPS gps
+        +leerSensores()
+        +filtrarSenales()
+        +obtenerFrecuencia()
+    }
+    
+    class IAEngine {
+        -ModeloTFLite modelo
+        -float umbralConfianza
+        -float umbralG
+        +cargarModelo()
+        +clasificarImpacto()
+        +obtenerConfianza()
+    }
+    
+    class EDRModule {
+        -Buffer buffer
+        -int duracionSegundos
+        -boolean persistido
+        +guardarTelemetria()
+        +persistirDatos()
+        +exportarJSON()
+    }
+    
+    class SOSProtocol {
+        -int temporizadorSegundos
+        -boolean confirmado
+        -String ubicacion
+        +iniciarTemporizador()
+        +llamar112()
+        +notificarContactos()
+        +alertarDGT()
+    }
+    
+    class FirebaseService {
+        -Firestore db
+        -FirebaseAuth auth
+        -FirebaseMessaging fcm
+        +guardarUsuario()
+        +guardarAccidente()
+        +syncDatos()
+    }
+    
+    class DashboardUI {
+        -TextView velocidad
+        -TextView estado
+        -MapView mapa
+        +actualizarTelemetria()
+        +mostrarAlerta()
+        +renderizarMapa()
+    }
+    
+    %% Relaciones principales
+    Usuario "1" *-- "0..*" Vehiculo : posee
+    Usuario "1" *-- "0..*" ContactoSOS : registra
+    Usuario "1" *-- "0..*" Viaje : realiza
+    Viaje "1" *-- "0..1" Accidente : puede_tener
+    Accidente "1" *-- "1" EDRModule : contiene
+    
+    %% Flujo de detección
+    SensorManager --> IAEngine : envia datos
+    IAEngine --> SOSProtocol : si impacto
+    SOSProtocol --> FirebaseService : registra
+    SOSProtocol --> ContactoSOS : usa contactos
+    
+    %% UI connections
+    DashboardUI --> SensorManager : muestra telemetria
+    DashboardUI --> SOSProtocol : muestra estado
+    DashboardUI --> IAEngine : muestra confianza
+    
+    %% Persistencia
+    FirebaseService ..> Usuario : persiste
+    FirebaseService ..> Viaje : persiste
+    FirebaseService ..> Accidente : persiste
+    
+    %% Notas
+    note for IAEngine "Modelo TFLite\n3 clases"
+    note for EDRModule "Buffer 30s\npersistencia"
+    note for SOSProtocol "Llama al 112\nsi sin respuesta"

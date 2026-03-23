@@ -1,0 +1,44 @@
+flowchart LR
+    %% Definición de Actores
+    Conductor((Conductor))
+    SistemaIA((Sistema IA))
+    ContactoSOS((Contacto SOS))
+    Servicio112((Servicio 112))
+
+    %% Frontera del Sistema
+    subgraph SafeDriveAI [Sistema SafeDrive AI]
+        direction TB
+        UC01([Iniciar Monitorización])
+        UC02([Registrar EDR])
+        UC03([Detectar Colisión])
+        UC04([Verificar Usuario])
+        UC05([Activar SOS 112])
+        UC06([Notificar Contactos])
+        UC07([Ver Dashboard])
+        UC08([Configurar Perfil])
+        UC09([Gestionar Parte])
+        UC10([Llamar Grúa])
+    end
+
+    %% Asociaciones del Conductor
+    Conductor --> UC01
+    Conductor --> UC07
+    Conductor --> UC08
+    Conductor --> UC09
+    Conductor --> UC10
+    Conductor --> UC04
+
+    %% Asociaciones del Sistema IA
+    SistemaIA --> UC02
+    SistemaIA --> UC03
+    SistemaIA --> UC05
+    SistemaIA --> UC06
+
+    %% Asociaciones con Actores Externos
+    UC05 --> Servicio112
+    UC06 --> ContactoSOS
+
+    %% Relaciones include
+    UC03 -.->|include| UC02
+    UC05 -.->|include| UC04
+    UC05 -.->|include| UC06
