@@ -43,3 +43,4 @@ Thumbs.db
 # --- Testing ---
 /test-results/
 /espresso-reports/
+/out/
