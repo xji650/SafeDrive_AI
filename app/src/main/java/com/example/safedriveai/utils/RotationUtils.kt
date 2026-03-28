@@ -87,7 +87,6 @@ fun RotationAwareContent(
     ) {
         if (containerSize != DpSize.Zero) {
             val isLandscape = rotation == DeviceRotation.LANDSCAPE_LEFT || rotation == DeviceRotation.LANDSCAPE_RIGHT
-
             val contentWidth = if (isLandscape) containerSize.height else containerSize.width
             val contentHeight = if (isLandscape) containerSize.width else containerSize.height
 

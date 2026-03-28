@@ -101,7 +101,7 @@ fun SafeDriveAIApp(navController: NavController) {
             modifier = Modifier.padding(innerPadding)
         ) {
             when (selectedScreen) {
-                AppDestinations.DASHBOARD -> DashboardScreen(navController)
+                AppDestinations.DASHBOARD -> DashboardApp()
                 AppDestinations.DIAGNOSTIC -> DiagnosticApp()
                 AppDestinations.MAPS -> MapsScreen()
                 AppDestinations.USER_PREFERENCE -> UserPreferenceScreen()
@@ -120,7 +120,6 @@ fun DashboardScreen(navController: NavController) {
         horizontalAlignment = Alignment.Start
     ) {
         Text(text = "Dashboard", style = MaterialTheme.typography.titleLarge)
-        DashboardApp(navController = navController)
     }
 }
 
