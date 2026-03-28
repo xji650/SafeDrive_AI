@@ -9,17 +9,8 @@ import kotlin.math.abs
 import com.example.safedriveai.ui.diagnostic.DiagnosticStatus // Importa tu enum de la UI
 
 object DiagnosticEngine {
-
-    /**
-     * Evalúa el estado REAL de un sensor.
-     * Es 'suspend' porque toma tiempo (milisegundos) encender la pieza y leer sus datos.
-     */
     suspend fun runDiagnosticOn(context: Context, sensorId: String): Pair<DiagnosticStatus, String> {
-
-        // 1. EL INSPECTOR: Preguntamos primero si la pieza física existe
         val missingHardware = SensorChecker.getMissingHardware(context)
-
-        // Si falta, no perdemos el tiempo intentando leer datos que no existen
         when (sensorId) {
             "ACCEL" -> if (missingHardware.contains("Acelerómetro")) return Pair(DiagnosticStatus.ERROR, "Pieza física no detectada.")
             "GYRO" -> if (missingHardware.contains("Giroscopio")) return Pair(DiagnosticStatus.ERROR, "Pieza física no detectada.")
@@ -27,18 +18,15 @@ object DiagnosticEngine {
             "MIC" -> if (missingHardware.contains("Micrófono")) return Pair(DiagnosticStatus.ERROR, "Sin hardware de micrófono.")
         }
 
-        // 2. EL MECÁNICO: Si llegamos aquí, la pieza EXISTE. Vamos a probarla.
         val sensorManager = context.getSystemService(Context.SENSOR_SERVICE) as SensorManager
 
         return when (sensorId) {
             "ACCEL" -> {
-                // Podríamos hacer una lectura real aquí también, pero asumimos OK si existe para simplificar
                 Pair(DiagnosticStatus.OK, "Sensor respondiendo correctamente.")
             }
             "GYRO" -> {
                 val gyro = sensorManager.getDefaultSensor(Sensor.TYPE_GYROSCOPE)
 
-                // Leemos el mundo real
                 suspendCancellableCoroutine { continuation ->
                     val listener = object : android.hardware.SensorEventListener {
                         override fun onSensorChanged(event: android.hardware.SensorEvent?) {

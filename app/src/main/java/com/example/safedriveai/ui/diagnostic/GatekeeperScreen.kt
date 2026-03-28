@@ -32,7 +32,6 @@ import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleEventObserver
 import com.example.safedriveai.sensors.SensorChecker
 
-// 1. Modelo de datos para cada permiso en la lista
 data class PermissionItemData(
     val title: String,
     val description: String,
@@ -44,11 +43,8 @@ data class PermissionItemData(
 fun GatekeeperScreen(onAllPermissionsGranted: @Composable () -> Unit) {
     val context = LocalContext.current
     val lifecycleOwner = androidx.lifecycle.compose.LocalLifecycleOwner.current
-
-    // Verificamos el hardware primero (Sensores)
     var missingHardwareList by remember { mutableStateOf(SensorChecker.getMissingHardware(context)) }
 
-    // 2. Definimos la lista de permisos visuales
     val permissionItems = remember {
         val list = mutableListOf(
             PermissionItemData(
@@ -67,7 +63,7 @@ fun GatekeeperScreen(onAllPermissionsGranted: @Composable () -> Unit) {
                 permissionsToRequest = listOf(Manifest.permission.RECORD_AUDIO)
             )
         )
-        // Añadimos Actividad Física solo si el Android lo requiere (Android 10+)
+
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
             list.add(
                 PermissionItemData(
@@ -81,10 +77,8 @@ fun GatekeeperScreen(onAllPermissionsGranted: @Composable () -> Unit) {
         list
     }
 
-    // 3. Estado que guarda qué permisos ya están concedidos
     var grantedPermissions by remember { mutableStateOf(setOf<String>()) }
 
-    // Función para actualizar el estado leyendo el sistema
     fun updatePermissionsState() {
         val currentGranted = mutableSetOf<String>()
         permissionItems.forEach { item ->
@@ -96,7 +90,6 @@ fun GatekeeperScreen(onAllPermissionsGranted: @Composable () -> Unit) {
         grantedPermissions = currentGranted
     }
 
-    // Actualizar permisos al iniciar y al volver de los ajustes
     DisposableEffect(lifecycleOwner) {
         val observer = LifecycleEventObserver { _, event ->
             if (event == Lifecycle.Event.ON_RESUME) {
@@ -107,14 +100,12 @@ fun GatekeeperScreen(onAllPermissionsGranted: @Composable () -> Unit) {
         onDispose { lifecycleOwner.lifecycle.removeObserver(observer) }
     }
 
-    // 4. Lanzador de permisos (Genérico para cualquier botón que se pulse)
     val permissionLauncher = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.RequestMultiplePermissions()
     ) { _ ->
         updatePermissionsState()
     }
 
-    // Comprobar si TODOS los permisos requeridos están concedidos
     val allGranted = permissionItems.all { item ->
         item.permissionsToRequest.all { it in grantedPermissions }
     }
@@ -156,7 +147,6 @@ fun GatekeeperScreen(onAllPermissionsGranted: @Composable () -> Unit) {
 
             Spacer(modifier = Modifier.height(32.dp))
 
-            // Dibujamos la lista de permisos
             permissionItems.forEach { item ->
                 val isItemGranted = item.permissionsToRequest.all { it in grantedPermissions }
 
@@ -172,7 +162,6 @@ fun GatekeeperScreen(onAllPermissionsGranted: @Composable () -> Unit) {
 
             Spacer(modifier = Modifier.weight(1f))
 
-            // Botón de ayuda por si el sistema bloqueó las ventanas emergentes
             TextButton(
                 onClick = {
                     val intent = Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS).apply {
@@ -187,7 +176,6 @@ fun GatekeeperScreen(onAllPermissionsGranted: @Composable () -> Unit) {
     }
 }
 
-// Composable para cada fila de la lista
 @Composable
 fun PermissionRow(
     item: PermissionItemData,
@@ -205,7 +193,6 @@ fun PermissionRow(
             .padding(16.dp),
         verticalAlignment = Alignment.CenterVertically
     ) {
-        // Icono
         Icon(
             imageVector = item.icon,
             contentDescription = item.title,
@@ -215,7 +202,6 @@ fun PermissionRow(
 
         Spacer(modifier = Modifier.width(16.dp))
 
-        // Textos
         Column(modifier = Modifier.weight(1f)) {
             Text(
                 text = item.title,
@@ -232,7 +218,6 @@ fun PermissionRow(
 
         Spacer(modifier = Modifier.width(8.dp))
 
-        // Botón o Check
         if (isGranted) {
             Icon(
                 imageVector = Icons.Default.CheckCircle,
