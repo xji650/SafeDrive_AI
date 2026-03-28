@@ -33,9 +33,12 @@ fun rememberDeviceRotation(): State<DeviceRotation> {
     val deviceRotation = remember { mutableStateOf(DeviceRotation.PORTRAIT) }
 
     DisposableEffect(context) {
-        if (!SensorChecker.hasRequiredSensors(context)) {
+        val missingHardware = SensorChecker.getMissingHardware(context)
+
+        if (missingHardware.contains("Acelerómetro")) {
             return@DisposableEffect onDispose { }
         }
+
         val listener = object : OrientationEventListener(context) {
             override fun onOrientationChanged(orientation: Int) {
                 if (orientation == ORIENTATION_UNKNOWN) return

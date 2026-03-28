@@ -61,18 +61,6 @@ fun SafeDriveAIApp(navController: NavController) {
         NavigationItem(AppDestinations.USER_PREFERENCE, Icons.Default.Person, "Prefs")
     )
 
-    val context = LocalContext.current
-
-    LaunchedEffect(Unit) {
-        if (!SensorChecker.hasRequiredSensors(context)) {
-            android.widget.Toast.makeText(
-                context,
-                "Error: Acelerómetro o Giroscopio no detectados.",
-                android.widget.Toast.LENGTH_LONG
-            ).show()
-        }
-    }
-
     Scaffold(
         bottomBar = {
             NavigationBar {
