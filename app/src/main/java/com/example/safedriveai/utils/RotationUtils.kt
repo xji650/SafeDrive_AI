@@ -3,6 +3,7 @@ package com.example.safedriveai.utils
 import android.view.OrientationEventListener
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.requiredSize
 import androidx.compose.foundation.layout.size
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -44,10 +45,11 @@ fun rememberDeviceRotation(): State<DeviceRotation> {
                 if (orientation == ORIENTATION_UNKNOWN) return
 
                 val newRotation = when (orientation) {
-                    in 45 until 135 -> DeviceRotation.LANDSCAPE_RIGHT
-                    in 135 until 225 -> DeviceRotation.PORTRAIT_UPSIDE_DOWN
-                    in 225 until 315 -> DeviceRotation.LANDSCAPE_LEFT
-                    else -> DeviceRotation.PORTRAIT
+                    in 70 until 110 -> DeviceRotation.LANDSCAPE_RIGHT
+                    in 160 until 200 -> DeviceRotation.PORTRAIT_UPSIDE_DOWN
+                    in 250 until 290 -> DeviceRotation.LANDSCAPE_LEFT
+                    in 340..360, in 0 until 20 -> DeviceRotation.PORTRAIT
+                    else -> return
                 }
 
                 if (newRotation != deviceRotation.value) {
@@ -91,7 +93,7 @@ fun RotationAwareContent(
 
             Box(
                 modifier = Modifier
-                    .size(contentWidth, contentHeight)
+                    .requiredSize(contentWidth, contentHeight)
                     .graphicsLayer {
                         rotationZ = rotation.angle
                     },

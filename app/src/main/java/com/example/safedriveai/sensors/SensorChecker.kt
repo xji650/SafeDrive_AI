@@ -8,7 +8,6 @@ import android.util.Log
 
 object SensorChecker {
 
-    // ESTA ES LA FUNCIÓN CLAVE QUE DEVUELVE UNA LISTA
     fun getMissingHardware(context: Context): List<String> {
         val missingHardware = mutableListOf<String>()
         val sensorManager = context.getSystemService(Context.SENSOR_SERVICE) as SensorManager

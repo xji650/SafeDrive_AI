@@ -19,7 +19,6 @@ import androidx.compose.material3.NavigationBarItem
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -28,13 +27,12 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.graphics.vector.ImageVector
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 import androidx.navigation.compose.rememberNavController
-import com.example.safedriveai.sensors.SensorChecker
 import com.example.safedriveai.ui.dashboard.DashboardApp
+import com.example.safedriveai.ui.diagnostic.DiagnosticApp
 import com.example.safedriveai.utils.RotationAwareContent
 import com.example.safedriveai.utils.rememberDeviceRotation
 
@@ -104,7 +102,7 @@ fun SafeDriveAIApp(navController: NavController) {
         ) {
             when (selectedScreen) {
                 AppDestinations.DASHBOARD -> DashboardScreen(navController)
-                AppDestinations.DIAGNOSTIC -> DiagnosticScreen()
+                AppDestinations.DIAGNOSTIC -> DiagnosticApp()
                 AppDestinations.MAPS -> MapsScreen()
                 AppDestinations.USER_PREFERENCE -> UserPreferenceScreen()
             }
@@ -137,6 +135,7 @@ fun DiagnosticScreen() {
         horizontalAlignment = Alignment.Start
     ) {
         Text(text = "Diagnostic", style = MaterialTheme.typography.titleLarge)
+        DiagnosticApp()
     }
 }
 

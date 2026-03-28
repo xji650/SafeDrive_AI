@@ -11,6 +11,7 @@ composeBom = "2024.09.00"
 navigationRuntimeKtx = "2.9.7"
 navigationCompose = "2.9.7"
 ui = "1.10.6"
+remoteCreationCore = "1.0.0-alpha07"
 
 [libraries]
 androidx-compose-material-icons-extended = { module = "androidx.compose.material:material-icons-extended" }
@@ -32,6 +33,7 @@ androidx-compose-material3-adaptive-navigation-suite = { group = "androidx.compo
 androidx-navigation-runtime-ktx = { group = "androidx.navigation", name = "navigation-runtime-ktx", version.ref = "navigationRuntimeKtx" }
 androidx-navigation-compose = { group = "androidx.navigation", name = "navigation-compose", version.ref = "navigationCompose" }
 androidx-ui = { group = "androidx.compose.ui", name = "ui", version.ref = "ui" }
+androidx-compose-remote-creation-core = { group = "androidx.compose.remote", name = "remote-creation-core", version.ref = "remoteCreationCore" }
 
 [plugins]
 android-application = { id = "com.android.application", version.ref = "agp" }
