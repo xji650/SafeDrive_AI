@@ -26,64 +26,79 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.graphics.graphicsLayer
+import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 import androidx.navigation.compose.rememberNavController
 import com.example.safedriveai.ui.dashboard.DashboardApp
+import com.example.safedriveai.utils.RotationAwareContent
+import com.example.safedriveai.utils.rememberDeviceRotation
 
-enum class AppDestinations{
-    DASHBOARD,
-    DIAGNOSTIC,
-    MAPS,
-    USER_PREFERENCE,
+enum class AppDestinations {
+    DASHBOARD, DIAGNOSTIC, MAPS, USER_PREFERENCE
 }
+
+data class NavigationItem(
+    val destination: AppDestinations,
+    val icon: ImageVector,
+    val label: String
+)
 
 @RequiresApi(Build.VERSION_CODES.O)
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun SafeDriveAIApp(navController: NavController) {
     var selectedScreen by remember { mutableStateOf(AppDestinations.DASHBOARD) }
+    val currentRotation by rememberDeviceRotation()
+    val navItems = listOf(
+        NavigationItem(AppDestinations.DASHBOARD, Icons.Default.Home, "Dashboard"),
+        NavigationItem(AppDestinations.DIAGNOSTIC, Icons.Default.Build, "Diagnostic"),
+        NavigationItem(AppDestinations.MAPS, Icons.Default.Place, "Maps"),
+        NavigationItem(AppDestinations.USER_PREFERENCE, Icons.Default.Person, "Prefs")
+    )
 
     Scaffold(
-
         bottomBar = {
             NavigationBar {
-                NavigationBarItem(
-                    icon = { Icon(Icons.Default.Home, contentDescription = "Dashboard") },
-                    selected = selectedScreen == AppDestinations.DASHBOARD,
-                    onClick = { selectedScreen = AppDestinations.DASHBOARD },
-                    label = { Text(text = "Dashboard") }
-                )
+                navItems.forEach { item ->
+                    val isSelected = selectedScreen == item.destination
 
-                NavigationBarItem(
-                    icon = { Icon(Icons.Default.Build, contentDescription = "Diagnostic") },
-                    selected = selectedScreen == AppDestinations.DIAGNOSTIC,
-                    onClick = { selectedScreen = AppDestinations.DIAGNOSTIC },
-                    label = { Text(text = "Diagnostic") }
-                )
-
-                NavigationBarItem(
-                    icon = { Icon(Icons.Default.Place, contentDescription = "Maps") },
-                    selected = selectedScreen == AppDestinations.MAPS,
-                    onClick = { selectedScreen = AppDestinations.MAPS },
-                    label = { Text(text = "Maps") }
-                )
-
-                NavigationBarItem(
-                    icon = { Icon(Icons.Default.Person, contentDescription = "User Preference") },
-                    selected = selectedScreen == AppDestinations.USER_PREFERENCE,
-                    onClick = { selectedScreen = AppDestinations.USER_PREFERENCE },
-                    label = { Text(text = "Preferences") }
-                )
+                    NavigationBarItem(
+                        selected = isSelected,
+                        onClick = { selectedScreen = item.destination },
+                        icon = {
+                            Column(
+                                horizontalAlignment = Alignment.CenterHorizontally,
+                                verticalArrangement = Arrangement.Center,
+                                modifier = Modifier.graphicsLayer {
+                                    rotationZ = currentRotation.angle
+                                }
+                            ) {
+                                Icon(
+                                    item.icon,
+                                    contentDescription = item.label,
+                                    tint = if (isSelected) MaterialTheme.colorScheme.primary
+                                    else MaterialTheme.colorScheme.onSurfaceVariant
+                                )
+                                Text(
+                                    text = item.label,
+                                    style = MaterialTheme.typography.labelSmall,
+                                    color = if (isSelected) MaterialTheme.colorScheme.primary
+                                    else MaterialTheme.colorScheme.onSurfaceVariant
+                                )
+                            }
+                        },
+                        label = null
+                    )
+                }
             }
         }
     ) { innerPadding ->
-        Box(
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(innerPadding)
+        RotationAwareContent(
+            rotation = currentRotation,
+            modifier = Modifier.padding(innerPadding)
         ) {
             when (selectedScreen) {
                 AppDestinations.DASHBOARD -> DashboardScreen(navController)
