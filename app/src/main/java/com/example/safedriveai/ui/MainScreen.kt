@@ -20,6 +20,7 @@ import androidx.compose.material3.NavigationBarItem
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -28,10 +29,12 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 import androidx.navigation.compose.rememberNavController
+import com.example.safedriveai.sensors.SensorChecker
 import com.example.safedriveai.ui.dashboard.DashboardApp
 import com.example.safedriveai.utils.RotationAwareContent
 import com.example.safedriveai.utils.rememberDeviceRotation
@@ -58,6 +61,18 @@ fun SafeDriveAIApp(navController: NavController) {
         NavigationItem(AppDestinations.MAPS, Icons.Default.Place, "Maps"),
         NavigationItem(AppDestinations.USER_PREFERENCE, Icons.Default.Person, "Prefs")
     )
+
+    val context = LocalContext.current
+
+    LaunchedEffect(Unit) {
+        if (!SensorChecker.isAccelerometerAvailable(context)) {
+            android.widget.Toast.makeText(
+                context,
+                "Error: Sensor de movimiento no detectado",
+                android.widget.Toast.LENGTH_LONG
+            ).show()
+        }
+    }
 
     Scaffold(
         bottomBar = {

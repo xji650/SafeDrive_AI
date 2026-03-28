@@ -12,6 +12,7 @@ import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.unit.DpSize
+import com.example.safedriveai.sensors.SensorChecker
 
 /**
  * Ángulos de rotación comunes basados en la orientación del dispositivo.
@@ -32,6 +33,9 @@ fun rememberDeviceRotation(): State<DeviceRotation> {
     val deviceRotation = remember { mutableStateOf(DeviceRotation.PORTRAIT) }
 
     DisposableEffect(context) {
+        if (!SensorChecker.isAccelerometerAvailable(context)) {
+            return@DisposableEffect onDispose { }
+        }
         val listener = object : OrientationEventListener(context) {
             override fun onOrientationChanged(orientation: Int) {
                 if (orientation == ORIENTATION_UNKNOWN) return
