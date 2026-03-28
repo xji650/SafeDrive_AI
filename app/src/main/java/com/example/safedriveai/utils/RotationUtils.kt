@@ -22,7 +22,9 @@ enum class DeviceRotation(val angle: Float) {
     PORTRAIT(0f),
     LANDSCAPE_LEFT(90f),
     PORTRAIT_UPSIDE_DOWN(180f),
-    LANDSCAPE_RIGHT(270f)
+    LANDSCAPE_RIGHT(270f);
+
+    val isLandscape: Boolean get() = this == LANDSCAPE_LEFT || this == LANDSCAPE_RIGHT
 }
 
 /**

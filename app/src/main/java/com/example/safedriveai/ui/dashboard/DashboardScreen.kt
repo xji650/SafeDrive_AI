@@ -22,10 +22,7 @@ val EmergencyRed = Color(0xFFEF4444)
 @OptIn(ExperimentalMaterial3Api::class)
 @RequiresApi(Build.VERSION_CODES.O)
 @Composable
-fun DashboardApp() {
-    val configuration = LocalConfiguration.current
-    val isLandscape = configuration.orientation == Configuration.ORIENTATION_LANDSCAPE
-
+fun DashboardApp(isLandscape: Boolean) {
     Surface(modifier = Modifier.fillMaxSize(), color = DarkBackground) {
         if (isLandscape) {
             // --- MODO HORIZONTAL PROFESIONAL (3 COLUMNAS) ---

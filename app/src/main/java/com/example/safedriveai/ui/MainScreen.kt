@@ -101,7 +101,7 @@ fun SafeDriveAIApp(navController: NavController) {
             modifier = Modifier.padding(innerPadding)
         ) {
             when (selectedScreen) {
-                AppDestinations.DASHBOARD -> DashboardApp()
+                AppDestinations.DASHBOARD -> DashboardApp(isLandscape = currentRotation.isLandscape)
                 AppDestinations.DIAGNOSTIC -> DiagnosticApp()
                 AppDestinations.MAPS -> MapsScreen()
                 AppDestinations.USER_PREFERENCE -> UserPreferenceScreen()
