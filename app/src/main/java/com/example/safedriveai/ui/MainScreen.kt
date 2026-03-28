@@ -3,7 +3,6 @@ package com.example.safedriveai.ui
 import android.os.Build
 import androidx.annotation.RequiresApi
 import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
@@ -65,10 +64,10 @@ fun SafeDriveAIApp(navController: NavController) {
     val context = LocalContext.current
 
     LaunchedEffect(Unit) {
-        if (!SensorChecker.isAccelerometerAvailable(context)) {
+        if (!SensorChecker.hasRequiredSensors(context)) {
             android.widget.Toast.makeText(
                 context,
-                "Error: Sensor de movimiento no detectado",
+                "Error: Acelerómetro o Giroscopio no detectados.",
                 android.widget.Toast.LENGTH_LONG
             ).show()
         }

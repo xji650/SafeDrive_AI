@@ -7,13 +7,18 @@ import androidx.navigation.NavHostController
 import androidx.navigation.compose.composable
 import com.example.safedriveai.ui.SafeDriveAIApp
 import androidx.navigation.compose.NavHost
+import com.example.safedriveai.ui.diagnostic.GatekeeperScreen
 
 @RequiresApi(Build.VERSION_CODES.O)
 @Composable
 fun NavGraph (navController: NavHostController) {
     NavHost(navController = navController, startDestination = "main") {
         composable("main") {
-            SafeDriveAIApp(navController)
+            GatekeeperScreen(
+                onAllPermissionsGranted = {
+                    SafeDriveAIApp(navController)
+                }
+            )
         }
     }
 }

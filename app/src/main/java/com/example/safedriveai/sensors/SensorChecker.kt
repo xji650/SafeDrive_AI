@@ -6,19 +6,16 @@ import android.hardware.SensorManager
 import android.util.Log
 
 object SensorChecker {
-
-    /**
-     * Verifica si el acelerómetro está disponible y funcional.
-     */
-    fun isAccelerometerAvailable(context: Context): Boolean {
+    fun hasRequiredSensors(context: Context): Boolean {
         val sensorManager = context.getSystemService(Context.SENSOR_SERVICE) as SensorManager
         val accelerometer = sensorManager.getDefaultSensor(Sensor.TYPE_ACCELEROMETER)
+        val gyroscope = sensorManager.getDefaultSensor(Sensor.TYPE_GYROSCOPE)
 
-        return if (accelerometer != null) {
-            true
-        } else {
-            Log.e("SafeDriveAI", "Dispositivo sin Acelerómetro detectado.")
-            false
+        val hasSensors = accelerometer != null && gyroscope != null
+
+        if (!hasSensors) {
+            Log.e("SafeDriveAI", "Falta hardware crítico: Acelerómetro o Giroscopio no detectados.")
         }
+        return hasSensors
     }
 }
