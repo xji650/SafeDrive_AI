@@ -29,25 +29,45 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 
 @Composable
-fun SpeedometerCard(modifier: Modifier = Modifier) {
+fun SpeedometerCard(speed: Float, modifier: Modifier = Modifier) {
     Card(
-        modifier = Modifier.fillMaxWidth(),
-        colors = CardDefaults.cardColors(containerColor = CardBackground)
+        modifier = modifier.fillMaxWidth(), // Usamos el modifier que entra por parámetro
+        colors = CardDefaults.cardColors(containerColor = CardBackground),
+        shape = androidx.compose.foundation.shape.RoundedCornerShape(20.dp) // Añadido para mantener el estilo
     ) {
-        Column(modifier = Modifier.fillMaxSize(), verticalArrangement = Arrangement.Center, horizontalAlignment = Alignment.CenterHorizontally) {
+        Column(
+            modifier = Modifier.fillMaxSize().padding(16.dp),
+            verticalArrangement = Arrangement.Center,
+            horizontalAlignment = Alignment.CenterHorizontally
+        ) {
             Row(verticalAlignment = Alignment.CenterVertically) {
                 Icon(Icons.Default.Speed, contentDescription = null, tint = Color.White, modifier = Modifier.size(16.dp))
                 Spacer(modifier = Modifier.width(8.dp))
                 Text("VELOCIDAD GPS", color = Color.White, fontWeight = FontWeight.Bold, fontSize = 11.sp)
             }
+
             Spacer(modifier = Modifier.height(2.dp))
+
             Row(verticalAlignment = Alignment.Bottom) {
-                Text("112", style = MaterialTheme.typography.displayLarge, fontWeight = FontWeight.Black, color = Color.White)
-                Text("km/h", modifier = Modifier.padding(bottom = 12.dp), color = Color.Gray)
+                // AQUÍ ESTÁ LA MAGIA: Pasamos la velocidad real a entero
+                Text(
+                    text = "${speed.toInt()}",
+                    style = MaterialTheme.typography.displayLarge,
+                    fontWeight = FontWeight.Black,
+                    color = Color.White
+                )
+                Text(
+                    text = "km/h",
+                    modifier = Modifier.padding(bottom = 12.dp, start = 4.dp),
+                    color = Color.Gray
+                )
             }
+
+            Spacer(modifier = Modifier.height(8.dp))
+
             // Indicador de confianza de la IA
             LinearProgressIndicator(
-                progress = { 0.1f }, // Nivel de riesgo bajo
+                progress = { 0.1f }, // Puedes animar esto después si quieres
                 modifier = Modifier.width(100.dp).height(4.dp),
                 color = NeonGreen,
                 trackColor = Color.DarkGray

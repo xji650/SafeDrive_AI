@@ -21,7 +21,7 @@ import androidx.compose.ui.unit.sp
 @Composable
 fun GForceCard(accelX: Float, accelY: Float, modifier: Modifier = Modifier) { // Recibe los datos reales
     Card(
-        modifier = Modifier.fillMaxWidth(),
+        modifier = modifier.fillMaxWidth(),
         colors = CardDefaults.cardColors(containerColor = CardBackground)
     ) {
         Column(modifier = Modifier.padding(12.dp), horizontalAlignment = Alignment.CenterHorizontally) {

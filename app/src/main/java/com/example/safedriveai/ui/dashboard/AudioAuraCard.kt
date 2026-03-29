@@ -27,30 +27,34 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Mic
 import androidx.compose.material3.Icon
 import androidx.compose.material3.LinearProgressIndicator
+import androidx.compose.foundation.layout.fillMaxSize
 
 @Composable
 fun AudioAuraCard(modifier: Modifier = Modifier) {
     Card(
         colors = CardDefaults.cardColors(containerColor = CardBackground),
         shape = RoundedCornerShape(12.dp),
-        modifier = Modifier.fillMaxWidth()
+        // 1. El Card recibe el modifier (con el weight del padre)
+        modifier = modifier.fillMaxWidth()
     ) {
-        Column(modifier = Modifier.padding(16.dp)) {
+        // 2. ¡AQUÍ ESTÁ LA SOLUCIÓN! fillMaxSize() antes del padding
+        Column(modifier = Modifier.fillMaxSize().padding(12.dp)) {
+
+            // --- Cabecera ---
             Row(verticalAlignment = Alignment.CenterVertically) {
                 Icon(Icons.Default.Mic, contentDescription = null, tint = Color.White, modifier = Modifier.size(16.dp))
                 Spacer(modifier = Modifier.width(8.dp))
-                Text("ANÁLISIS SONIDO", color = Color.White, fontWeight = FontWeight.Bold, fontSize = 11.sp)
+                Text("ANÁLISIS ACÚSTICO", color = Color.White, fontWeight = FontWeight.Bold, fontSize = 11.sp)
             }
 
             Spacer(modifier = Modifier.height(10.dp))
 
-            // Visualizador de ondas (Simulado con barras de diferentes alturas)
+            // --- Visualizador de ondas ---
             Row(
-                modifier = Modifier.fillMaxWidth().height(60.dp),
+                modifier = Modifier.fillMaxWidth().height(40.dp), // Un poco menos alto para ahorrar espacio
                 horizontalArrangement = Arrangement.SpaceEvenly,
                 verticalAlignment = Alignment.CenterVertically
             ) {
-                // Estas barras las conectaremos luego al nivel de decibelios real
                 val barHeights = listOf(0.4f, 0.7f, 0.5f, 0.9f, 0.6f, 0.3f, 0.8f)
                 barHeights.forEach { height ->
                     Box(
@@ -62,23 +66,29 @@ fun AudioAuraCard(modifier: Modifier = Modifier) {
                 }
             }
 
+            // --- Espaciador flexible ---
+            // Ahora que la Column tiene fillMaxSize, esto empujará el contenido inferior
+            // justo hasta el borde de abajo de la tarjeta.
             Spacer(modifier = Modifier.weight(1f))
 
-            // Monitor de Riesgo (La IA prediciendo si hay accidente)
-            Column {
-                Column (modifier = Modifier.fillMaxWidth()) {
+            // --- Monitor de Riesgo (Fondo) ---
+            Column(modifier = Modifier.fillMaxWidth()) {
+                Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
                     Text("RIESGO DE IMPACTO", color = Color.Gray, fontSize = 10.sp)
                     Text("2% - BAJO", color = NeonGreen, fontSize = 10.sp, fontWeight = FontWeight.Bold)
                 }
+
                 Spacer(modifier = Modifier.height(4.dp))
+
                 LinearProgressIndicator(
                     progress = { 0.02f },
                     modifier = Modifier.fillMaxWidth().height(6.dp),
                     color = NeonGreen,
                     trackColor = Color(0xFF0F172A)
                 )
+
                 Text(
-                    "Monitorización TFLite activa en local (RGPD)",
+                    "Monitorización TFLite activa en local",
                     color = Color.Gray.copy(alpha = 0.6f),
                     fontSize = 8.sp,
                     modifier = Modifier.padding(top = 8.dp)

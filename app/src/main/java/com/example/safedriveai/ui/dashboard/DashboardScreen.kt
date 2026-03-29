@@ -1,18 +1,13 @@
 package com.example.safedriveai.ui.dashboard
 
-import android.content.res.Configuration
 import android.os.Build
 import androidx.annotation.RequiresApi
 import androidx.compose.foundation.layout.*
-import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.unit.dp
 import com.example.safedriveai.sensors.SensorDataManager
 
 
@@ -41,11 +36,11 @@ fun DashboardApp(isLandscape: Boolean) {
     Surface(modifier = Modifier.fillMaxSize(), color = DarkBackground) {
         if (isLandscape) {
             // --- MODO HORIZONTAL PROFESIONAL (3 COLUMNAS) ---
-            DashboardLandscapeLayout(x, y, speed, location, )
+            DashboardLandscapeLayout(x, y, location, speed )
 
         } else {
             // --- MODO VERTICAL (Optimizando espacio) ---
-            DashboardPortraitLayout(x, y, speed, location)
+            DashboardPortraitLayout(x, y, location, speed)
         }
     }
 }

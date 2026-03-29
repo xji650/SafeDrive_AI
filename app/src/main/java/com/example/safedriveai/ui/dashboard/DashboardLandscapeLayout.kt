@@ -13,7 +13,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 
 @Composable
-fun DashboardLandscapeLayout(x: Float, y: Float, speed: Float, location: android.location.Location?) {
+fun DashboardLandscapeLayout(x: Float, y: Float, location: android.location.Location?, speed: Float,) {
     // SIN TopStatusBar() aquí
     Row(
         modifier = Modifier.fillMaxSize().padding(12.dp),
@@ -29,13 +29,13 @@ fun DashboardLandscapeLayout(x: Float, y: Float, speed: Float, location: android
         // --- COLUMNA CENTRAL ---
         Column(modifier = Modifier.weight(0.4f), verticalArrangement = Arrangement.spacedBy(12.dp)) {
             MapSecurityCard(currentLocation = location, modifier = Modifier.weight(1f))
-            Box(modifier = Modifier.height(70.dp)) { EmergencyButton() }
+            Box(modifier = Modifier.height(50.dp)) { EmergencyButton() }
         }
 
         // --- COLUMNA DERECHA ---
         Column(modifier = Modifier.weight(0.3f), verticalArrangement = Arrangement.spacedBy(12.dp)) {
-            GForceCard(accelX = x, accelY = y, modifier = Modifier.weight(0.8f))
-            AudioAuraCard(modifier = Modifier.weight(1.2f)) // Asegúrate de quitar la altura fija en AudioAuraCard
+            GForceCard(accelX = x, accelY = y, modifier = Modifier.weight(1.2f))
+            AudioAuraCard(modifier = Modifier.weight(0.8f)) // Asegúrate de quitar la altura fija en AudioAuraCard
         }
     }
 }

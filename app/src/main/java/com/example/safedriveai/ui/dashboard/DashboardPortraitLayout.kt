@@ -16,8 +16,8 @@ import androidx.compose.ui.unit.dp
 fun DashboardPortraitLayout(
     x: Float,
     y: Float,
+    location: android.location.Location?,
     speed: Float,
-    location: android.location.Location?
 ) {
     // SIN SCROLL. Usamos weights para empujar todo a su sitio.
     Column(modifier = Modifier.fillMaxSize().padding(16.dp), verticalArrangement = Arrangement.spacedBy(12.dp)) {
@@ -29,13 +29,13 @@ fun DashboardPortraitLayout(
         }
 
         // Bloque inferior estático
-        Box(modifier = Modifier.height(110.dp)) { SpeedometerCard() }
+        Box(modifier = Modifier.height(150.dp)) { SpeedometerCard(speed = speed) }
 
         Row(modifier = Modifier.height(200.dp), horizontalArrangement = Arrangement.spacedBy(12.dp)) {
             Box(modifier = Modifier.weight(1f)) { GForceCard(x,y) }
             Box(modifier = Modifier.weight(1f)) { AudioAuraCard() }
         }
 
-        Box(modifier = Modifier.height(70.dp)) { EmergencyButton() }
+        Box(modifier = Modifier.height(50.dp)) { EmergencyButton() }
     }
 }

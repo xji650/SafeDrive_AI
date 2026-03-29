@@ -26,7 +26,7 @@ fun EmergencyButton(modifier: Modifier = Modifier) {
         onClick = { /* Acción de emergencia */ },
         colors = ButtonDefaults.buttonColors(containerColor = EmergencyRed),
         shape = RoundedCornerShape(12.dp),
-        modifier = Modifier.fillMaxWidth()
+        modifier = modifier.fillMaxWidth()
     ) {
         Row(verticalAlignment = Alignment.CenterVertically) {
             Icon(Icons.Default.Call, contentDescription = "Llamar", modifier = Modifier.size(32.dp))
