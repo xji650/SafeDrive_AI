@@ -7,9 +7,17 @@ import kotlinx.coroutines.suspendCancellableCoroutine
 import kotlin.coroutines.resume
 import kotlin.math.abs
 import com.example.safedriveai.ui.diagnostic.DiagnosticStatus // Importa tu enum de la UI
+import android.Manifest
+import android.content.pm.PackageManager
+import android.net.ConnectivityManager
+import android.net.NetworkCapabilities
+import androidx.core.content.ContextCompat
+
 
 object DiagnosticEngine {
+
     suspend fun runDiagnosticOn(context: Context, sensorId: String): Pair<DiagnosticStatus, String> {
+        // 1. Verificación de Hardware (Físico)
         val missingHardware = SensorChecker.getMissingHardware(context)
         when (sensorId) {
             "ACCEL" -> if (missingHardware.contains("Acelerómetro")) return Pair(DiagnosticStatus.ERROR, "Pieza física no detectada.")
@@ -22,25 +30,23 @@ object DiagnosticEngine {
 
         return when (sensorId) {
             "ACCEL" -> {
-                Pair(DiagnosticStatus.OK, "Sensor respondiendo correctamente.")
+                // Chequeo rápido de existencia
+                Pair(DiagnosticStatus.OK, "Acelerómetro respondiendo.")
             }
-            "GYRO" -> {
-                val gyro = sensorManager.getDefaultSensor(Sensor.TYPE_GYROSCOPE)
 
+            "GYRO" -> {
+                // Chequeo ACTIVO: Mira si los valores se vuelven locos
+                val gyro = sensorManager.getDefaultSensor(Sensor.TYPE_GYROSCOPE)
                 suspendCancellableCoroutine { continuation ->
                     val listener = object : android.hardware.SensorEventListener {
                         override fun onSensorChanged(event: android.hardware.SensorEvent?) {
                             event?.let {
-                                val x = abs(it.values[0])
-                                val y = abs(it.values[1])
-                                val z = abs(it.values[2])
-
+                                val x = abs(it.values[0]); val y = abs(it.values[1]); val z = abs(it.values[2])
                                 sensorManager.unregisterListener(this)
-
                                 if (x > 0.2f || y > 0.2f || z > 0.2f) {
-                                    if (continuation.isActive) continuation.resume(Pair(DiagnosticStatus.WARNING, "Vibración excesiva. Fija el móvil firmemente."))
+                                    if (continuation.isActive) continuation.resume(Pair(DiagnosticStatus.WARNING, "Vibración detectada. Fija el móvil."))
                                 } else {
-                                    if (continuation.isActive) continuation.resume(Pair(DiagnosticStatus.OK, "Calibración estática perfecta (0.0 rad/s)."))
+                                    if (continuation.isActive) continuation.resume(Pair(DiagnosticStatus.OK, "Calibración estática perfecta."))
                                 }
                             }
                         }
@@ -50,18 +56,47 @@ object DiagnosticEngine {
                     continuation.invokeOnCancellation { sensorManager.unregisterListener(listener) }
                 }
             }
+
             "GPS" -> {
                 val locationManager = context.getSystemService(Context.LOCATION_SERVICE) as android.location.LocationManager
-                if (locationManager.isProviderEnabled(android.location.LocationManager.GPS_PROVIDER)) {
-                    Pair(DiagnosticStatus.OK, "Señal GPS activa y lista para navegar.")
+                val isEnabled = locationManager.isProviderEnabled(android.location.LocationManager.GPS_PROVIDER)
+                val hasPermission = ContextCompat.checkSelfPermission(context, Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED
+
+                if (!hasPermission) Pair(DiagnosticStatus.ERROR, "Falta permiso de ubicación.")
+                else if (!isEnabled) Pair(DiagnosticStatus.WARNING, "GPS apagado en el sistema.")
+                else Pair(DiagnosticStatus.OK, "Señal GPS activa.")
+            }
+
+            "MIC" -> {
+                val hasPerm = ContextCompat.checkSelfPermission(context, Manifest.permission.RECORD_AUDIO) == PackageManager.PERMISSION_GRANTED
+                if (hasPerm) Pair(DiagnosticStatus.OK, "Micrófono listo.")
+                else Pair(DiagnosticStatus.ERROR, "Permiso de audio denegado.")
+            }
+
+            "SOS" -> {
+                val hasCall = ContextCompat.checkSelfPermission(context, Manifest.permission.CALL_PHONE) == PackageManager.PERMISSION_GRANTED
+                val hasSms = ContextCompat.checkSelfPermission(context, Manifest.permission.SEND_SMS) == PackageManager.PERMISSION_GRANTED
+
+                if (hasCall && hasSms) Pair(DiagnosticStatus.OK, "Protocolo SOS verificado.")
+                else Pair(DiagnosticStatus.ERROR, "Faltan permisos de emergencia.")
+            }
+
+            "NET" -> {
+                if (isInternetAvailable(context)) {
+                    Pair(DiagnosticStatus.OK, "Conexión a internet estable.")
                 } else {
-                    Pair(DiagnosticStatus.WARNING, "Ubicación apagada. Activa el GPS en ajustes.")
+                    Pair(DiagnosticStatus.WARNING, "Modo offline (Sin conexión).")
                 }
             }
-            "MIC" -> {
-                Pair(DiagnosticStatus.OK, "Micrófono listo para recibir comandos.")
-            }
+
             else -> Pair(DiagnosticStatus.PENDING, "Sensor desconocido")
         }
+    }
+
+    private fun isInternetAvailable(context: Context): Boolean {
+        val cm = context.getSystemService(Context.CONNECTIVITY_SERVICE) as ConnectivityManager
+        val nw = cm.activeNetwork ?: return false
+        val actNw = cm.getNetworkCapabilities(nw) ?: return false
+        return actNw.hasCapability(NetworkCapabilities.NET_CAPABILITY_INTERNET)
     }
 }
