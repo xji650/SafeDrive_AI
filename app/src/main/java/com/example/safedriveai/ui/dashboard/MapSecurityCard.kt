@@ -1,50 +1,88 @@
 package com.example.safedriveai.ui.dashboard
 
-import androidx.compose.foundation.background
-import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.fillMaxHeight
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.material3.Card
-import androidx.compose.runtime.Composable
-import androidx.compose.ui.unit.Dp
-import androidx.compose.ui.Modifier
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.shape.CircleShape
+import android.R
+import android.annotation.SuppressLint
+import android.location.Location
+import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
-import androidx.compose.material3.Text
-import androidx.compose.ui.Alignment
-import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.remember
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
+import androidx.compose.ui.viewinterop.AndroidView
+import org.osmdroid.tileprovider.tilesource.TileSourceFactory
+import org.osmdroid.util.GeoPoint
+import org.osmdroid.views.MapView
+import androidx.compose.foundation.isSystemInDarkTheme
+import org.osmdroid.views.overlay.TilesOverlay
+import org.osmdroid.config.Configuration as OsmConfig // <--- Importante para el user agent
+import androidx.compose.ui.res.painterResource
+import org.osmdroid.views.overlay.Marker
 
+@SuppressLint("RememberReturnType")
 @Composable
-fun MapSecurityCard(height: Dp = Dp.Unspecified) {
+fun MapSecurityCard(
+    currentLocation: Location?,
+    modifier: Modifier = Modifier // Acepta el modifier que le pasamos
+) {
+    val context = LocalContext.current
+    val isDark = isSystemInDarkTheme() // Detecta si el móvil está en modo oscuro
+
+    // 1. Configuración Real: Identifica tu app ante los servidores de mapas
+    remember {
+        OsmConfig.getInstance().load(context, context.getSharedPreferences("osm_pref", 0))
+        OsmConfig.getInstance().userAgentValue = context.packageName // Identificación obligatoria
+    }
+
+    // Recordamos el MapView para no recrearlo en cada recomposición
+    val mapView = remember { MapView(context) }
+
+    // Configuramos el marcador del coche
+    val carMarker = remember {
+        Marker(mapView).apply {
+            title = "Tu Vehículo"
+            icon = androidx.core.content.ContextCompat.getDrawable(context, android.R.drawable.ic_menu_compass)
+            setAnchor(Marker.ANCHOR_CENTER, Marker.ANCHOR_CENTER)
+        }
+    }
+
+    // Usamos el modifier que nos pasan (fillMaxSize del layout principal)
     Card(
-        modifier = Modifier.fillMaxWidth().then(if (height != Dp.Unspecified) Modifier.height(height) else Modifier.fillMaxHeight()),
+        modifier = modifier.fillMaxWidth(),
         colors = CardDefaults.cardColors(containerColor = CardBackground),
         shape = RoundedCornerShape(20.dp)
     ) {
-        Box(modifier = Modifier.fillMaxSize()) {
-            // Aquí iría el MapView de Google o OSM
-            Text("MAPA DGT 3.0", Modifier.align(Alignment.Center), color = Color.Gray)
+        // Especificamos explícitamente el tipo <MapView> para quitar los errores de compilación
+        AndroidView<MapView>(
+            factory = { ctx ->
+                MapView(ctx).apply {
+                    setTileSource(TileSourceFactory.MAPNIK)
+                    setMultiTouchControls(true)
+                    controller.setZoom(17.5) // Zoom más cercano para conducción
+                    overlays.add(carMarker) // Añadimos el coche al mapa
 
-            // OVERLAY: Estado de la Caja Negra (EDR)
-            Row(
-                modifier = Modifier.align(Alignment.TopStart).padding(12.dp).background(Color.Black.copy(0.6f), RoundedCornerShape(8.dp)).padding(8.dp),
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                Box(modifier = Modifier.size(8.dp).background(Color.Red, CircleShape))
-                Spacer(Modifier.width(8.dp))
-                Text("EDR ACTIVE: 30s BUFFER", color = Color.White, fontSize = 10.sp, fontWeight = FontWeight.Bold)
+                    // --- MODO NOCHE PROFESIONAL ---
+                    if (isDark) {
+                        overlayManager.tilesOverlay.setColorFilter(TilesOverlay.INVERT_COLORS)
+                    }
+                }
+            },
+            modifier = Modifier.fillMaxSize(), // El mapa llena el Card
+            update = { view ->
+                // Actualizamos la posición del coche en tiempo real
+                currentLocation?.let { loc ->
+                    val point = GeoPoint(loc.latitude, loc.longitude)
+                    carMarker.position = point
+                    view.controller.animateTo(point) // Animación suave
+
+                    if (loc.hasBearing()) {
+                        view.mapOrientation = -loc.bearing // Rotamos el mapa según el rumbo
+                    }
+                }
             }
-        }
+        )
     }
 }

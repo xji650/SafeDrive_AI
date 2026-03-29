@@ -29,20 +29,20 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.LinearProgressIndicator
 
 @Composable
-fun AudioAuraCard() {
+fun AudioAuraCard(modifier: Modifier = Modifier) {
     Card(
         colors = CardDefaults.cardColors(containerColor = CardBackground),
         shape = RoundedCornerShape(12.dp),
-        modifier = Modifier.fillMaxWidth().height(220.dp)
+        modifier = Modifier.fillMaxWidth()
     ) {
         Column(modifier = Modifier.padding(16.dp)) {
             Row(verticalAlignment = Alignment.CenterVertically) {
                 Icon(Icons.Default.Mic, contentDescription = null, tint = Color.White, modifier = Modifier.size(16.dp))
                 Spacer(modifier = Modifier.width(8.dp))
-                Text("ANÁLISIS ACÚSTICO", color = Color.White, fontWeight = FontWeight.Bold, fontSize = 12.sp)
+                Text("ANÁLISIS SONIDO", color = Color.White, fontWeight = FontWeight.Bold, fontSize = 11.sp)
             }
 
-            Spacer(modifier = Modifier.height(20.dp))
+            Spacer(modifier = Modifier.height(10.dp))
 
             // Visualizador de ondas (Simulado con barras de diferentes alturas)
             Row(
@@ -66,7 +66,7 @@ fun AudioAuraCard() {
 
             // Monitor de Riesgo (La IA prediciendo si hay accidente)
             Column {
-                Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
+                Column (modifier = Modifier.fillMaxWidth()) {
                     Text("RIESGO DE IMPACTO", color = Color.Gray, fontSize = 10.sp)
                     Text("2% - BAJO", color = NeonGreen, fontSize = 10.sp, fontWeight = FontWeight.Bold)
                 }

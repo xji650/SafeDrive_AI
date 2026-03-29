@@ -21,17 +21,17 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 
 @Composable
-fun EmergencyButton() {
+fun EmergencyButton(modifier: Modifier = Modifier) {
     Button(
         onClick = { /* Acción de emergencia */ },
         colors = ButtonDefaults.buttonColors(containerColor = EmergencyRed),
         shape = RoundedCornerShape(12.dp),
-        modifier = Modifier.fillMaxWidth().height(80.dp)
+        modifier = Modifier.fillMaxWidth()
     ) {
         Row(verticalAlignment = Alignment.CenterVertically) {
             Icon(Icons.Default.Call, contentDescription = "Llamar", modifier = Modifier.size(32.dp))
             Spacer(modifier = Modifier.width(12.dp))
-            Text("EMERGENCIA 112", fontWeight = FontWeight.ExtraBold, fontSize = 24.sp)
+            Text("EMERGENCY 112", fontWeight = FontWeight.ExtraBold, fontSize = 24.sp)
         }
     }
 }

@@ -35,6 +35,17 @@ import com.example.safedriveai.ui.dashboard.DashboardApp
 import com.example.safedriveai.ui.diagnostic.DiagnosticApp
 import com.example.safedriveai.utils.RotationAwareContent
 import com.example.safedriveai.utils.rememberDeviceRotation
+import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.slideInVertically
+import androidx.compose.animation.slideOutVertically
+import androidx.compose.foundation.gestures.detectTapGestures
+import androidx.compose.runtime.*
+import androidx.compose.ui.input.pointer.pointerInput
+import android.app.Activity
+import androidx.compose.ui.platform.LocalContext
+import androidx.core.view.WindowCompat
+import androidx.core.view.WindowInsetsCompat
+import androidx.core.view.WindowInsetsControllerCompat
 
 enum class AppDestinations {
     DASHBOARD, DIAGNOSTIC, MAPS, USER_PREFERENCE
@@ -52,6 +63,31 @@ data class NavigationItem(
 fun SafeDriveAIApp(navController: NavController) {
     var selectedScreen by remember { mutableStateOf(AppDestinations.DASHBOARD) }
     val currentRotation by rememberDeviceRotation()
+
+    // --- 1. ESTADO DE PANTALLA COMPLETA ---
+    var isFullScreen by remember { mutableStateOf(false) }
+    val context = LocalContext.current
+    val activity = context as? Activity
+
+    // --- 2. AUTOMATIZACIÓN INTELIGENTE ---
+    LaunchedEffect(isFullScreen) {
+        activity?.window?.let { window ->
+            val insetsController = WindowCompat.getInsetsController(window, window.decorView)
+            if (isFullScreen) {
+                // Oculta la barra de arriba y la de navegación de abajo de Android
+                insetsController.hide(WindowInsetsCompat.Type.systemBars())
+                insetsController.systemBarsBehavior = WindowInsetsControllerCompat.BEHAVIOR_SHOW_TRANSIENT_BARS_BY_SWIPE
+            } else {
+                // Las vuelve a mostrar si sales de pantalla completa
+                insetsController.show(WindowInsetsCompat.Type.systemBars())
+            }
+        }
+    }
+
+    LaunchedEffect(currentRotation.isLandscape) {
+        isFullScreen = currentRotation.isLandscape
+    }
+
     val navItems = listOf(
         NavigationItem(AppDestinations.DASHBOARD, Icons.Default.Home, "Dashboard"),
         NavigationItem(AppDestinations.DIAGNOSTIC, Icons.Default.Build, "Diagnostic"),
@@ -61,80 +97,68 @@ fun SafeDriveAIApp(navController: NavController) {
 
     Scaffold(
         bottomBar = {
-            NavigationBar {
-                navItems.forEach { item ->
-                    val isSelected = selectedScreen == item.destination
+            // --- 3. ANIMACIÓN DE OCULTACIÓN ---
+            AnimatedVisibility(
+                visible = !isFullScreen,
+                enter = slideInVertically(initialOffsetY = { it }), // Desliza hacia arriba
+                exit = slideOutVertically(targetOffsetY = { it })   // Desliza hacia abajo
+            ) {
+                NavigationBar {
+                    navItems.forEach { item ->
+                        val isSelected = selectedScreen == item.destination
 
-                    NavigationBarItem(
-                        selected = isSelected,
-                        onClick = { selectedScreen = item.destination },
-                        icon = {
-                            Column(
-                                horizontalAlignment = Alignment.CenterHorizontally,
-                                verticalArrangement = Arrangement.Center,
-                                modifier = Modifier.graphicsLayer {
-                                    rotationZ = currentRotation.angle
+                        NavigationBarItem(
+                            selected = isSelected,
+                            onClick = { selectedScreen = item.destination },
+                            icon = {
+                                Column(
+                                    horizontalAlignment = Alignment.CenterHorizontally,
+                                    verticalArrangement = Arrangement.Center,
+                                    modifier = Modifier.graphicsLayer {
+                                        rotationZ = currentRotation.angle
+                                    }
+                                ) {
+                                    Icon(
+                                        item.icon,
+                                        contentDescription = item.label,
+                                        tint = if (isSelected) MaterialTheme.colorScheme.primary
+                                        else MaterialTheme.colorScheme.onSurfaceVariant
+                                    )
+                                    Text(
+                                        text = item.label,
+                                        style = MaterialTheme.typography.labelSmall,
+                                        color = if (isSelected) MaterialTheme.colorScheme.primary
+                                        else MaterialTheme.colorScheme.onSurfaceVariant
+                                    )
                                 }
-                            ) {
-                                Icon(
-                                    item.icon,
-                                    contentDescription = item.label,
-                                    tint = if (isSelected) MaterialTheme.colorScheme.primary
-                                    else MaterialTheme.colorScheme.onSurfaceVariant
-                                )
-                                Text(
-                                    text = item.label,
-                                    style = MaterialTheme.typography.labelSmall,
-                                    color = if (isSelected) MaterialTheme.colorScheme.primary
-                                    else MaterialTheme.colorScheme.onSurfaceVariant
-                                )
-                            }
-                        },
-                        label = null
-                    )
+                            },
+                            label = null
+                        )
+                    }
                 }
             }
         }
     ) { innerPadding ->
         RotationAwareContent(
             rotation = currentRotation,
-            modifier = Modifier.padding(innerPadding)
+            modifier = Modifier
+                .padding(innerPadding)
+                // --- 4. GESTO DE DOBLE TOQUE MANUAL ---
+                .pointerInput(Unit) {
+                    detectTapGestures(
+                        onDoubleTap = {
+                            isFullScreen = !isFullScreen
+                        }
+                    )
+                }
         ) {
             when (selectedScreen) {
                 AppDestinations.DASHBOARD -> DashboardApp(isLandscape = currentRotation.isLandscape)
-                AppDestinations.DIAGNOSTIC -> DiagnosticApp()
+                AppDestinations.DIAGNOSTIC -> DiagnosticApp() // Asegúrate de tener estas funciones
                 AppDestinations.MAPS -> MapsScreen()
                 AppDestinations.USER_PREFERENCE -> UserPreferenceScreen()
             }
         }
-    }
-}
-@RequiresApi(Build.VERSION_CODES.O)
-@Composable
-fun DashboardScreen(navController: NavController) {
-    Column(
-        modifier = Modifier
-            .fillMaxSize()
-            .padding(16.dp),
-        verticalArrangement = Arrangement.Center,
-        horizontalAlignment = Alignment.Start
-    ) {
-        Text(text = "Dashboard", style = MaterialTheme.typography.titleLarge)
-    }
-}
-
-@RequiresApi(Build.VERSION_CODES.O)
-@Composable
-fun DiagnosticScreen() {
-    Column(
-        modifier = Modifier
-            .fillMaxSize()
-            .padding(16.dp),
-        verticalArrangement = Arrangement.Center,
-        horizontalAlignment = Alignment.Start
-    ) {
-        Text(text = "Diagnostic", style = MaterialTheme.typography.titleLarge)
-        DiagnosticApp()
     }
 }
 

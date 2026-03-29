@@ -10,9 +10,11 @@ kotlin = "2.0.21"
 composeBom = "2024.09.00"
 navigationRuntimeKtx = "2.9.7"
 navigationCompose = "2.9.7"
+osmdroidAndroid = "6.1.20"
 ui = "1.10.6"
 remoteCreationCore = "1.0.0-alpha07"
 material3 = "1.4.0"
+foundationLayout = "1.10.6"
 
 [libraries]
 androidx-compose-material-icons-extended = { module = "androidx.compose.material:material-icons-extended" }
@@ -36,6 +38,8 @@ androidx-navigation-compose = { group = "androidx.navigation", name = "navigatio
 androidx-ui = { group = "androidx.compose.ui", name = "ui", version.ref = "ui" }
 androidx-compose-remote-creation-core = { group = "androidx.compose.remote", name = "remote-creation-core", version.ref = "remoteCreationCore" }
 androidx-material3 = { group = "androidx.compose.material3", name = "material3", version.ref = "material3" }
+osmdroid-android = { module = "org.osmdroid:osmdroid-android", version.ref = "osmdroidAndroid" }
+androidx-compose-foundation-layout = { group = "androidx.compose.foundation", name = "foundation-layout", version.ref = "foundationLayout" }
 
 [plugins]
 android-application = { id = "com.android.application", version.ref = "agp" }

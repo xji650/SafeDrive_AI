@@ -27,59 +27,25 @@ val EmergencyRed = Color(0xFFEF4444)
 fun DashboardApp(isLandscape: Boolean) {
     val context = LocalContext.current
     val sensorData = remember { SensorDataManager(context) }
+
     val x by sensorData.accelX.collectAsState()
     val y by sensorData.accelY.collectAsState()
+    val speed by sensorData.speed.collectAsState()
+    val location by sensorData.currentLocation.collectAsState()
 
     DisposableEffect(Unit) {
         sensorData.startListening() // Arrancamos los sensores al entrar
-
-        onDispose {
-            sensorData.stopListening() // Los apagamos al salir para no gastar batería
-        }
+        onDispose { sensorData.stopListening()}
     }
 
     Surface(modifier = Modifier.fillMaxSize(), color = DarkBackground) {
         if (isLandscape) {
             // --- MODO HORIZONTAL PROFESIONAL (3 COLUMNAS) ---
-            DashboardLandscapeLayout(x, y)
+            DashboardLandscapeLayout(x, y, speed, location, )
 
         } else {
             // --- MODO VERTICAL (Optimizando espacio) ---
-            DashboardPortraitLayout(x, y)
+            DashboardPortraitLayout(x, y, speed, location)
         }
-    }
-}
-
-@Composable
-fun DashboardLandscapeLayout(x: Float, y: Float) {
-    Row(modifier = Modifier.fillMaxSize().padding(12.dp), horizontalArrangement = Arrangement.spacedBy(12.dp)) {
-        // Columna 1: Velocidad y SOS
-        Column(modifier = Modifier.weight(0.25f), verticalArrangement = Arrangement.spacedBy(12.dp)) {
-            SpeedometerCard()
-            EmergencyButton()
-        }
-        // Columna 2: MAPA GRANDE (Protagonista DGT 3.0)
-        Column(modifier = Modifier.weight(0.5f)) {
-            MapSecurityCard()
-        }
-        // Columna 3: IA y Sensores
-        Column(modifier = Modifier.weight(0.25f), verticalArrangement = Arrangement.spacedBy(12.dp)) {
-            GForceCard(x,y)
-            AudioAuraCard()
-        }
-    }
-}
-
-@Composable
-fun DashboardPortraitLayout(x: Float, y: Float) {
-    Column(modifier = Modifier.fillMaxSize().padding(16.dp).verticalScroll(rememberScrollState()), verticalArrangement = Arrangement.spacedBy(16.dp)) {
-        HeaderCard()
-        MapSecurityCard(height = 250.dp) // Mapa protagonista
-        SpeedometerCard()
-        Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
-            Box(modifier = Modifier.weight(1f)) { GForceCard(x,y) }
-            Box(modifier = Modifier.weight(1f)) { AudioAuraCard() }
-        }
-        EmergencyButton()
     }
 }
