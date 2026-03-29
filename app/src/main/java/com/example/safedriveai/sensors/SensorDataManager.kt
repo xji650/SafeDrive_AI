@@ -49,6 +49,8 @@ class SensorDataManager(private val context: Context) : SensorEventListener, Loc
     val currentLocation = _currentLocation.asStateFlow()
 
     private val blackBox = BlackBoxManager(context)
+    private var lastCrashTime: Long = 0L
+
 
     // --- MÉTODOS DE CONTROL FUSIONADOS ---
 
@@ -139,12 +141,16 @@ class SensorDataManager(private val context: Context) : SensorEventListener, Loc
 
             // 2. TRIGGER DE EMERGENCIA (CU-03)
             // Si superamos los 4.5G (un impacto muy fuerte), guardamos el evento
-            if (currentG > 4.5f) {
-                Log.e("SafeDriveAI", "¡COLISIÓN DETECTADA! Fuerza G: $currentG")
+            val currentTime = System.currentTimeMillis()
+
+            // Si la G es alta Y han pasado más de 10 segundos (10000 ms) desde el último guardado
+            if (currentG > 1.8f && (currentTime - lastCrashTime > 10000)) {
+
+                Log.e("SafeDriveAI", "¡Impacto detectado! Guardando archivo...")
                 blackBox.saveEventToDisk()
 
-                // NOTA: Aquí es donde en el futuro dispararemos la pantalla de
-                // cuenta atrás para llamar al 112 (SOS Protocol).
+                // Actualizamos el reloj para que no vuelva a guardar en los próximos 10 segundos
+                lastCrashTime = currentTime
             }
         }
     }

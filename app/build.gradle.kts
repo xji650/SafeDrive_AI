@@ -60,6 +60,7 @@ dependencies {
     implementation(libs.listenablefuture)
     implementation(libs.androidx.compose.runtime)
     implementation(libs.androidx.compiler)
+    implementation(libs.androidx.compose.foundation)
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)
     androidTestImplementation(libs.androidx.espresso.core)

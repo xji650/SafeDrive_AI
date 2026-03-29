@@ -20,6 +20,7 @@ material3 = "1.4.0"
 foundationLayout = "1.10.6"
 runtime = "1.10.6"
 compiler = "3.2.0-alpha11"
+foundation = "1.10.6"
 
 [libraries]
 androidx-compose-material-icons-extended = { module = "androidx.compose.material:material-icons-extended" }
@@ -50,6 +51,7 @@ androidx-compose-foundation-layout = { group = "androidx.compose.foundation", na
 play-services-location = { module = "com.google.android.gms:play-services-location", version.ref = "playServicesLocation" }
 androidx-compose-runtime = { group = "androidx.compose.runtime", name = "runtime", version.ref = "runtime" }
 androidx-compiler = { group = "androidx.databinding", name = "compiler", version.ref = "compiler" }
+androidx-compose-foundation = { group = "androidx.compose.foundation", name = "foundation", version.ref = "foundation" }
 
 [plugins]
 android-application = { id = "com.android.application", version.ref = "agp" }
