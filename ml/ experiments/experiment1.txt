@@ -1,0 +1,26 @@
+8/8 ━━━━━━━━━━━━━━━━━━━━ 0s 5ms/step - accuracy: 0.7667 - loss: 0.6077
+Accuracy: 0.7666666507720947
+8/8 ━━━━━━━━━━━━━━━━━━━━ 0s 8ms/step
+Pred: Falso Positivo | Real: Falso Positivo
+Pred: Posible Susto | Real: Posible Susto
+Pred: Posible Susto | Real: Falso Positivo
+Pred: Falso Positivo | Real: Falso Positivo
+Pred: Posible Susto | Real: Falso Positivo
+Pred: Posible Susto | Real: Choque Grave
+Pred: Falso Positivo | Real: Posible Susto
+Pred: Falso Positivo | Real: Falso Positivo
+Pred: Falso Positivo | Real: Falso Positivo
+Pred: Falso Positivo | Real: Falso Positivo
+Saved artifact at '/tmp/tmpc2kxxa1y'. The following endpoints are available:
+
+* Endpoint 'serve'
+  args_0 (POSITIONAL_ONLY): TensorSpec(shape=(None, 4), dtype=tf.float32, name='keras_tensor_20')
+Output Type:
+  TensorSpec(shape=(None, 3), dtype=tf.float32, name=None)
+Captures:
+  132729079102352: TensorSpec(shape=(), dtype=tf.resource, name=None)
+  132729125643152: TensorSpec(shape=(), dtype=tf.resource, name=None)
+  132729125641808: TensorSpec(shape=(), dtype=tf.resource, name=None)
+  132729125640080: TensorSpec(shape=(), dtype=tf.resource, name=None)
+  132729079102928: TensorSpec(shape=(), dtype=tf.resource, name=None)
+  132729079098128: TensorSpec(shape=(), dtype=tf.resource, name=None
