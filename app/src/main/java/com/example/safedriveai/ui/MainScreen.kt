@@ -42,13 +42,15 @@ import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.runtime.*
 import androidx.compose.ui.input.pointer.pointerInput
 import android.app.Activity
+import androidx.compose.material.icons.filled.Report
 import androidx.compose.ui.platform.LocalContext
 import androidx.core.view.WindowCompat
 import androidx.core.view.WindowInsetsCompat
 import androidx.core.view.WindowInsetsControllerCompat
+import com.example.safedriveai.ui.edr.EDRApp
 
 enum class AppDestinations {
-    DASHBOARD, DIAGNOSTIC, MAPS, USER_PREFERENCE
+    DASHBOARD, DIAGNOSTIC, EDR, USER_PREFERENCE
 }
 
 data class NavigationItem(
@@ -91,7 +93,7 @@ fun SafeDriveAIApp(navController: NavController) {
     val navItems = listOf(
         NavigationItem(AppDestinations.DASHBOARD, Icons.Default.Home, "Dashboard"),
         NavigationItem(AppDestinations.DIAGNOSTIC, Icons.Default.Build, "Diagnostic"),
-        NavigationItem(AppDestinations.MAPS, Icons.Default.Place, "Maps"),
+        NavigationItem(AppDestinations.EDR, Icons.Default.Report, "EDR"),
         NavigationItem(AppDestinations.USER_PREFERENCE, Icons.Default.Person, "Prefs")
     )
 
@@ -154,25 +156,11 @@ fun SafeDriveAIApp(navController: NavController) {
         ) {
             when (selectedScreen) {
                 AppDestinations.DASHBOARD -> DashboardApp(isLandscape = currentRotation.isLandscape)
-                AppDestinations.DIAGNOSTIC -> DiagnosticApp() // Asegúrate de tener estas funciones
-                AppDestinations.MAPS -> MapsScreen()
+                AppDestinations.DIAGNOSTIC -> DiagnosticApp()
+                AppDestinations.EDR -> EDRApp()
                 AppDestinations.USER_PREFERENCE -> UserPreferenceScreen()
             }
         }
-    }
-}
-
-@RequiresApi(Build.VERSION_CODES.O)
-@Composable
-fun MapsScreen() {
-    Column(
-        modifier = Modifier
-            .fillMaxSize()
-            .padding(16.dp),
-        verticalArrangement = Arrangement.Center,
-        horizontalAlignment = Alignment.Start
-    ) {
-        Text(text = "Maps", style = MaterialTheme.typography.titleLarge)
     }
 }
 

@@ -1,7 +1,9 @@
 package com.example.safedriveai.sensors
 
 import android.annotation.SuppressLint
+import android.app.PendingIntent
 import android.content.Context
+import android.content.Intent
 import android.hardware.Sensor
 import android.hardware.SensorEvent
 import android.hardware.SensorEventListener
@@ -9,11 +11,20 @@ import android.hardware.SensorManager
 import android.location.Location
 import android.location.LocationListener
 import android.location.LocationManager
+import com.google.android.gms.location.ActivityRecognition
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlin.math.sqrt
+import android.media.AudioFormat
+import android.media.AudioRecord
+import android.media.MediaRecorder
+import android.os.Build
+import android.util.Log
+import androidx.annotation.RequiresApi
+import com.example.safedriveai.ui.edr.BlackBoxManager
+import kotlinx.coroutines.*
 
-class SensorDataManager(context: Context) : SensorEventListener, LocationListener {
+class SensorDataManager(private val context: Context) : SensorEventListener, LocationListener {
 
     // 1. MOTORES DE HARDWARE
     private val sensorManager = context.getSystemService(Context.SENSOR_SERVICE) as SensorManager
@@ -37,16 +48,18 @@ class SensorDataManager(context: Context) : SensorEventListener, LocationListene
     private val _currentLocation = MutableStateFlow<Location?>(null)
     val currentLocation = _currentLocation.asStateFlow()
 
-    // --- MÉTODOS DE CONTROL ---
+    private val blackBox = BlackBoxManager(context)
+
+    // --- MÉTODOS DE CONTROL FUSIONADOS ---
 
     @SuppressLint("MissingPermission") // Seguro gracias a tu GatekeeperScreen
     fun startListening() {
-        // Encendemos Acelerómetro
+        // 1. Encendemos Acelerómetro
         accelerometer?.let {
             sensorManager.registerListener(this, it, SensorManager.SENSOR_DELAY_UI)
         }
 
-        // Encendemos GPS (Actualiza cada 1 seg o cada 1 metro)
+        // 2. Encendemos GPS (Actualiza cada 1 seg o cada 1 metro)
         try {
             if (locationManager.isProviderEnabled(LocationManager.GPS_PROVIDER)) {
                 locationManager.requestLocationUpdates(
@@ -59,15 +72,50 @@ class SensorDataManager(context: Context) : SensorEventListener, LocationListene
         } catch (e: Exception) {
             e.printStackTrace()
         }
+
+        // 3. Encendemos Activity Recognition (El "sobre" para Google)
+        try {
+            val client = ActivityRecognition.getClient(context)
+            val intent = Intent(context, ActivityReceiver::class.java)
+            val pendingIntent = PendingIntent.getBroadcast(
+                context,
+                0,
+                intent,
+                PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_MUTABLE
+            )
+            // Le pedimos a Google que evalúe la actividad cada 3 segundos
+            client.requestActivityUpdates(3000L, pendingIntent)
+        } catch (e: Exception) {
+            e.printStackTrace()
+        }
+
+        startAudioMonitoring()
     }
 
+    @SuppressLint("MissingPermission")
     fun stopListening() {
+        // 1 y 2. Apagamos Acelerómetro y GPS
         sensorManager.unregisterListener(this)
         locationManager.removeUpdates(this)
+
+        // 3. APAGAMOS LA ACTIVIDAD FÍSICA (Ahorro de batería)
+        try {
+            val client = ActivityRecognition.getClient(context)
+            val intent = Intent(context, ActivityReceiver::class.java)
+            val pendingIntent = PendingIntent.getBroadcast(
+                context, 0, intent,
+                PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_MUTABLE
+            )
+            client.removeActivityUpdates(pendingIntent)
+        } catch (e: Exception) {
+            e.printStackTrace()
+        }
+        stopAudioMonitoring()
     }
 
     // --- CALLBACKS ACELERÓMETRO (Inercia) ---
 
+    @RequiresApi(Build.VERSION_CODES.O)
     override fun onSensorChanged(event: SensorEvent?) {
         if (event?.sensor?.type == Sensor.TYPE_ACCELEROMETER) {
             val x = event.values[0]
@@ -77,7 +125,27 @@ class SensorDataManager(context: Context) : SensorEventListener, LocationListene
             // Gravedad estándar ~ 9.81 m/s²
             _accelX.value = x / 9.81f
             _accelY.value = y / 9.81f
-            _totalG.value = sqrt(x*x + y*y + z*z) / 9.81f
+            val currentG = sqrt(x*x + y*y + z*z) / 9.81f
+
+            _totalG.value = currentG
+
+            // 1. ALIMENTAR LA CAJA NEGRA (EDR)
+            // Le pasamos la fuerza G actual, la velocidad actual y el audio actual
+            blackBox.addPoint(
+                g = currentG,
+                s = _speed.value,
+                a = _amplitude.value
+            )
+
+            // 2. TRIGGER DE EMERGENCIA (CU-03)
+            // Si superamos los 4.5G (un impacto muy fuerte), guardamos el evento
+            if (currentG > 4.5f) {
+                Log.e("SafeDriveAI", "¡COLISIÓN DETECTADA! Fuerza G: $currentG")
+                blackBox.saveEventToDisk()
+
+                // NOTA: Aquí es donde en el futuro dispararemos la pantalla de
+                // cuenta atrás para llamar al 112 (SOS Protocol).
+            }
         }
     }
 
@@ -94,7 +162,48 @@ class SensorDataManager(context: Context) : SensorEventListener, LocationListene
         _speed.value = if (speedInKmH < 1f) 0f else speedInKmH // Filtro de ruido para coche parado
     }
 
-    // Métodos requeridos por la interfaz (pueden quedar vacíos)
+    // Métodos requeridos por la interfaz
     override fun onProviderEnabled(provider: String) {}
     override fun onProviderDisabled(provider: String) {}
+
+    private val _amplitude = MutableStateFlow(0f)
+    val amplitude = _amplitude.asStateFlow()
+
+    private var audioRecord: AudioRecord? = null
+    private var audioJob: Job? = null
+
+    @SuppressLint("MissingPermission")
+    fun startAudioMonitoring() {
+        val sampleRate = 44100 // Más compatible que 8000
+        val bufferSize = AudioRecord.getMinBufferSize(sampleRate, AudioFormat.CHANNEL_IN_MONO, AudioFormat.ENCODING_PCM_16BIT)
+
+        try {
+            audioRecord = AudioRecord(MediaRecorder.AudioSource.MIC, sampleRate, AudioFormat.CHANNEL_IN_MONO, AudioFormat.ENCODING_PCM_16BIT, bufferSize)
+            audioRecord?.startRecording()
+
+            audioJob = CoroutineScope(Dispatchers.Default).launch {
+                val buffer = ShortArray(bufferSize)
+                while (isActive) {
+                    val readSize = audioRecord?.read(buffer, 0, buffer.size) ?: 0
+                    if (readSize > 0) {
+                        var sum = 0.0
+                        for (i in 0 until readSize) sum += Math.abs(buffer[i].toInt())
+                        val avg = sum / readSize
+                        // Normalizamos para el Aura (valor de 0.0 a 1.0)
+                        _amplitude.value = (avg / 3000.0).toFloat().coerceIn(0f, 1f)
+                    }
+                    delay(100)
+                }
+            }
+        } catch (e: Exception) { Log.e("Audio", "Error micro: ${e.message}") }
+    }
+
+    private fun stopAudioMonitoring() {
+        audioJob?.cancel()
+        try {
+            audioRecord?.stop()
+            audioRecord?.release()
+        } catch (e: Exception) {}
+        audioRecord = null
+    }
 }

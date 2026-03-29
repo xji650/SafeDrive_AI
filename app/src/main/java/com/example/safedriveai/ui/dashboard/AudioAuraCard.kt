@@ -1,6 +1,5 @@
 package com.example.safedriveai.ui.dashboard
 
-import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -16,10 +15,8 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -28,72 +25,68 @@ import androidx.compose.material.icons.filled.Mic
 import androidx.compose.material3.Icon
 import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.material3.Surface
 
 @Composable
-fun AudioAuraCard(modifier: Modifier = Modifier) {
-    Card(
-        colors = CardDefaults.cardColors(containerColor = CardBackground),
-        shape = RoundedCornerShape(12.dp),
-        // 1. El Card recibe el modifier (con el weight del padre)
-        modifier = modifier.fillMaxWidth()
-    ) {
-        // 2. ¡AQUÍ ESTÁ LA SOLUCIÓN! fillMaxSize() antes del padding
-        Column(modifier = Modifier.fillMaxSize().padding(12.dp)) {
+fun AudioAuraCard(amplitude: Float, modifier: Modifier = Modifier) {
+    // Lógica de estados dinámicos
+    val dbValue = (30 + (amplitude * 80)).toInt()
 
-            // --- Cabecera ---
+    val statusText = when {
+        amplitude > 0.8f -> "¡ESTRUENDO DETECTADO!"
+        amplitude > 0.5f -> "RUIDO ELEVADO"
+        else -> "AMBIENTE NORMAL"
+    }
+
+    val statusColor = when {
+        amplitude > 0.8f -> EmergencyRed
+        amplitude > 0.5f -> Color.Yellow
+        else -> NeonGreen
+    }
+
+    Card(
+        modifier = modifier.fillMaxWidth(),
+        colors = CardDefaults.cardColors(containerColor = CardBackground),
+        shape = RoundedCornerShape(20.dp)
+    ) {
+        Column(
+            modifier = Modifier.padding(12.dp).fillMaxSize(),
+            horizontalAlignment = Alignment.CenterHorizontally,
+            verticalArrangement = Arrangement.SpaceBetween
+        ) {
             Row(verticalAlignment = Alignment.CenterVertically) {
-                Icon(Icons.Default.Mic, contentDescription = null, tint = Color.White, modifier = Modifier.size(16.dp))
-                Spacer(modifier = Modifier.width(8.dp))
-                Text("ANÁLISIS ACÚSTICO", color = Color.White, fontWeight = FontWeight.Bold, fontSize = 11.sp)
+                Icon(Icons.Default.Mic, contentDescription = null, tint = Color.White, modifier = Modifier.size(14.dp))
+                Spacer(Modifier.width(8.dp))
+                Text("ANÁLISIS ACÚSTICO", color = Color.White, fontSize = 10.sp, fontWeight = FontWeight.Bold)
             }
 
-            Spacer(modifier = Modifier.height(10.dp))
-
-            // --- Visualizador de ondas ---
+            // Visualizador de "Aura" reactivo
             Row(
-                modifier = Modifier.fillMaxWidth().height(40.dp), // Un poco menos alto para ahorrar espacio
+                Modifier.fillMaxWidth().height(40.dp),
                 horizontalArrangement = Arrangement.SpaceEvenly,
                 verticalAlignment = Alignment.CenterVertically
             ) {
-                val barHeights = listOf(0.4f, 0.7f, 0.5f, 0.9f, 0.6f, 0.3f, 0.8f)
-                barHeights.forEach { height ->
-                    Box(
-                        modifier = Modifier
-                            .width(6.dp)
-                            .fillMaxHeight(height)
-                            .background(Color(0xFF3B82F6), RoundedCornerShape(3.dp))
-                    )
+                repeat(7) { index -> // Aumentamos a 7 barras para que se vea más denso
+                    // Variamos el factor para que las barras centrales sean más altas
+                    val distFromCenter = Math.abs(index - 3)
+                    val factor = 1f - (distFromCenter * 0.2f)
+                    val heightVal = (amplitude * 35f * factor).coerceAtLeast(4f)
+
+                    Surface(
+                        modifier = Modifier.width(3.dp).height(heightVal.dp),
+                        color = statusColor,
+                        shape = RoundedCornerShape(2.dp)
+                    ) {}
                 }
             }
 
-            // --- Espaciador flexible ---
-            // Ahora que la Column tiene fillMaxSize, esto empujará el contenido inferior
-            // justo hasta el borde de abajo de la tarjeta.
-            Spacer(modifier = Modifier.weight(1f))
-
-            // --- Monitor de Riesgo (Fondo) ---
-            Column(modifier = Modifier.fillMaxWidth()) {
-                Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
-                    Text("RIESGO DE IMPACTO", color = Color.Gray, fontSize = 10.sp)
-                    Text("2% - BAJO", color = NeonGreen, fontSize = 10.sp, fontWeight = FontWeight.Bold)
-                }
-
-                Spacer(modifier = Modifier.height(4.dp))
-
-                LinearProgressIndicator(
-                    progress = { 0.02f },
-                    modifier = Modifier.fillMaxWidth().height(6.dp),
-                    color = NeonGreen,
-                    trackColor = Color(0xFF0F172A)
-                )
-
-                Text(
-                    "Monitorización TFLite activa en local",
-                    color = Color.Gray.copy(alpha = 0.6f),
-                    fontSize = 8.sp,
-                    modifier = Modifier.padding(top = 8.dp)
-                )
-            }
+            // Texto de estado dinámico
+            Text(
+                text = statusText + " (${dbValue}dB)",
+                color = statusColor,
+                fontSize = 9.sp,
+                fontWeight = FontWeight.ExtraBold
+            )
         }
     }
 }

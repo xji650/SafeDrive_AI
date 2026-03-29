@@ -1,5 +1,6 @@
 package com.example.safedriveai.ui.dashboard
 
+import android.location.Location
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -16,8 +17,10 @@ import androidx.compose.ui.unit.dp
 fun DashboardPortraitLayout(
     x: Float,
     y: Float,
-    location: android.location.Location?,
+    location: Location?,
     speed: Float,
+    currentActivity: String,
+    amplitude: Float
 ) {
     // SIN SCROLL. Usamos weights para empujar todo a su sitio.
     Column(modifier = Modifier.fillMaxSize().padding(16.dp), verticalArrangement = Arrangement.spacedBy(12.dp)) {
@@ -29,11 +32,14 @@ fun DashboardPortraitLayout(
         }
 
         // Bloque inferior estático
-        Box(modifier = Modifier.height(150.dp)) { SpeedometerCard(speed = speed) }
+        Row(modifier = Modifier.height(150.dp), horizontalArrangement = Arrangement.spacedBy(12.dp)) {
+            Box(modifier = Modifier.weight(1f)) { SpeedometerCard(speed = speed) }
+            Box(modifier = Modifier.weight(1f)) { ActivityMonitorCard(location = location, activityStatus = currentActivity) }
+        }
 
         Row(modifier = Modifier.height(200.dp), horizontalArrangement = Arrangement.spacedBy(12.dp)) {
             Box(modifier = Modifier.weight(1f)) { GForceCard(x,y) }
-            Box(modifier = Modifier.weight(1f)) { AudioAuraCard() }
+            Box(modifier = Modifier.weight(1f)) { AudioAuraCard(amplitude) }
         }
 
         Box(modifier = Modifier.height(50.dp)) { EmergencyButton() }

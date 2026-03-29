@@ -8,6 +8,7 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
+import com.example.safedriveai.sensors.ActivityState
 import com.example.safedriveai.sensors.SensorDataManager
 
 
@@ -25,8 +26,10 @@ fun DashboardApp(isLandscape: Boolean) {
 
     val x by sensorData.accelX.collectAsState()
     val y by sensorData.accelY.collectAsState()
-    val speed by sensorData.speed.collectAsState()
     val location by sensorData.currentLocation.collectAsState()
+    val speed by sensorData.speed.collectAsState()
+    val currentActivity by ActivityState.currentActivity.collectAsState()
+    val amplitude by sensorData.amplitude.collectAsState()
 
     DisposableEffect(Unit) {
         sensorData.startListening() // Arrancamos los sensores al entrar
@@ -36,11 +39,11 @@ fun DashboardApp(isLandscape: Boolean) {
     Surface(modifier = Modifier.fillMaxSize(), color = DarkBackground) {
         if (isLandscape) {
             // --- MODO HORIZONTAL PROFESIONAL (3 COLUMNAS) ---
-            DashboardLandscapeLayout(x, y, location, speed )
+            DashboardLandscapeLayout(x, y, location, speed, currentActivity, amplitude)
 
         } else {
             // --- MODO VERTICAL (Optimizando espacio) ---
-            DashboardPortraitLayout(x, y, location, speed)
+            DashboardPortraitLayout(x, y, location, speed, currentActivity, amplitude)
         }
     }
 }
