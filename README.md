@@ -35,9 +35,9 @@ Esto ha resultado en un código menos modular y más difícil de mantener, aunqu
 
 ## 4. Instrucciones para Ejecutar la App
 
-1.  **Requisitos:** Android Studio Ladybug, dispositivo Android 10+ y archivo del modelo en `app/src/main/assets/safedrive_cu03_model.tflite`.
+1.  **Requisitos:** Android Studio Ladybug, dispositivo Android 10+ y archivo del modelo en `ml/scripts/safedrive_cu03_model.tflite`.
 
-2.  **Clonación:** `git clone https://github.com/xji650/safedrive-ai.git`.
+2.  **Clonación:** `git clone https://github.com/xji650/SafeDrive_AI.git`.
 
 3.  **Sincronización:** Abrir en Android Studio y sincronizar archivos Gradle.
 
