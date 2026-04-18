@@ -31,20 +31,26 @@ import com.example.safedriveai.ui.dashboard.NeonGreen
 
 @Composable
 fun AudioAuraCard(amplitude: Float, modifier: Modifier = Modifier) {
-    // Lógica de estados dinámicos
-    val dbValue = (30 + (amplitude * 80)).toInt()
 
+    // 1. EL VALOR REAL: Ya no inventamos matemáticas. Mostramos lo que manda el sensor.
+    val dbValue = amplitude.toInt()
+
+    // 2. UMBRALES FÍSICOS REALES: Ajustados a la escala de Decibelios
     val statusText = when {
-        amplitude > 0.8f -> "¡ESTRUENDO DETECTADO!"
-        amplitude > 0.5f -> "RUIDO ELEVADO"
-        else -> "AMBIENTE NORMAL"
+        dbValue > 100 -> "¡ESTRUENDO DETECTADO!" // Accidente, claxon fuerte, grito
+        dbValue > 80 -> "RUIDO ELEVADO"          // Tráfico denso, música de coche
+        else -> "AMBIENTE NORMAL"                // Conducción tranquila (40-70 dB)
     }
 
     val statusColor = when {
-        amplitude > 0.8f -> EmergencyRed
-        amplitude > 0.5f -> Color.Yellow
+        dbValue > 100 -> EmergencyRed
+        dbValue > 80 -> Color.Yellow
         else -> NeonGreen
     }
+
+    // 3. NORMALIZACIÓN GRÁFICA: Convertimos los 120dB máximos a un porcentaje (0.0 a 1.0)
+    // Esto es SOLO para que las barritas no se salgan de la tarjeta
+    val uiPercentage = (amplitude / 120f).coerceIn(0f, 1f)
 
     Card(
         modifier = modifier.fillMaxWidth(),
@@ -68,11 +74,12 @@ fun AudioAuraCard(amplitude: Float, modifier: Modifier = Modifier) {
                 horizontalArrangement = Arrangement.SpaceEvenly,
                 verticalAlignment = Alignment.CenterVertically
             ) {
-                repeat(7) { index -> // Aumentamos a 7 barras para que se vea más denso
-                    // Variamos el factor para que las barras centrales sean más altas
+                repeat(7) { index ->
                     val distFromCenter = Math.abs(index - 3)
                     val factor = 1f - (distFromCenter * 0.2f)
-                    val heightVal = (amplitude * 35f * factor).coerceAtLeast(4f)
+
+                    // Usamos uiPercentage en lugar del amplitude bruto
+                    val heightVal = (uiPercentage * 35f * factor).coerceAtLeast(4f)
 
                     Surface(
                         modifier = Modifier.width(3.dp).height(heightVal.dp),
