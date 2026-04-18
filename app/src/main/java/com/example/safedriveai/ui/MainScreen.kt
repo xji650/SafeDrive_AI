@@ -83,7 +83,7 @@ fun SafeDriveAIApp(navController: NavController) {
     val dashboardViewModel: DashboardViewModel = viewModel(
         factory = object : ViewModelProvider.Factory {
             override fun <T : ViewModel> create(modelClass: Class<T>): T {
-                val sensorRepository = SensorRepository(context.applicationContext)
+                val sensorRepository = SensorRepository.getInstance(context)
                 return DashboardViewModel(sensorRepository) as T
             }
         }

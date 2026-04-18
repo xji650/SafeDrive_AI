@@ -20,6 +20,11 @@ fun EdrScreen(viewModel: EdrViewModel) {
     val selectedFile by viewModel.selectedFile.collectAsState()
     val realData by viewModel.selectedEventData.collectAsState()
 
+    LaunchedEffect(Unit) {
+        viewModel.loadFile()
+    }
+
+
     // Fondo nativo del sistema
     Box(modifier = Modifier.fillMaxSize().background(MaterialTheme.colorScheme.background)) {
 
@@ -54,7 +59,7 @@ fun EdrScreen(viewModel: EdrViewModel) {
                     LazyColumn(verticalArrangement = Arrangement.spacedBy(12.dp)) {
                         items(incidentFiles) { file ->
                             // En lugar de guardar el estado aquí, se lo decimos al ViewModel
-                            IncidentCard(file, onOpen = { viewModel.abrirDetalle(file) })
+                            IncidentCard(file, onOpen = { viewModel.openDetails(file) })
                         }
                     }
                 }
@@ -69,7 +74,7 @@ fun EdrScreen(viewModel: EdrViewModel) {
                     data = data,
                     file = selectedFile!!,
                     maxG = maxG,
-                    onBack = { viewModel.cerrarDetalle() }
+                    onBack = { viewModel.closeDetails() }
                 )
             } ?: run {
                 // Muestra un estado de carga mientras el ViewModel lee el JSON
@@ -80,4 +85,3 @@ fun EdrScreen(viewModel: EdrViewModel) {
         }
     }
 }
-

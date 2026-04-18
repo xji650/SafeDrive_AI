@@ -1,5 +1,6 @@
 package com.example.safedriveai.data.repository
 
+import android.annotation.SuppressLint
 import android.content.Context
 import android.os.Build
 import androidx.annotation.RequiresApi
@@ -14,7 +15,7 @@ import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.cancelChildren
 import kotlinx.coroutines.launch
 
-class SensorRepository(private val context: Context) {
+class SensorRepository private constructor(private val context: Context) {
 
     private val accelProvider = AccelerometerProvider(context)
     private val locationProvider = LocationProvider(context)
@@ -30,6 +31,18 @@ class SensorRepository(private val context: Context) {
     val currentLocation = locationProvider.currentLocation
 
     private val scope = CoroutineScope(Dispatchers.Main + SupervisorJob())
+
+    companion object {
+        @SuppressLint("StaticFieldLeak")
+        @Volatile
+        private var INSTANCE: SensorRepository? = null
+
+        fun getInstance(context: Context): SensorRepository {
+            return INSTANCE ?: synchronized(this) {
+                INSTANCE ?: SensorRepository(context.applicationContext).also { INSTANCE = it }
+            }
+        }
+    }
 
     @RequiresApi(Build.VERSION_CODES.O)
     fun startListening() {

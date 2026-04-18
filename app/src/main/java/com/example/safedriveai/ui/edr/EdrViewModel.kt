@@ -24,18 +24,16 @@ class EdrViewModel(private val blackBoxManager: BlackBoxManager) : ViewModel() {
     private val _selectedEventData = MutableStateFlow<List<EdrModel>?>(null)
     val selectedEventData: StateFlow<List<EdrModel>?> = _selectedEventData.asStateFlow()
 
-    init {
-        cargarArchivos()
-    }
 
-    fun cargarArchivos() {
+
+    fun loadFile() {
         viewModelScope.launch {
             // Le pedimos al manager que busque los archivos
             _incidentFiles.value = blackBoxManager.getSavedEvents()
         }
     }
 
-    fun abrirDetalle(file: File) {
+    fun openDetails(file: File) {
         _selectedFile.value = file
         viewModelScope.launch {
             // Le pedimos al manager que lea y parsee el JSON
@@ -43,7 +41,7 @@ class EdrViewModel(private val blackBoxManager: BlackBoxManager) : ViewModel() {
         }
     }
 
-    fun cerrarDetalle() {
+    fun closeDetails() {
         _selectedFile.value = null
         _selectedEventData.value = null
     }
