@@ -7,10 +7,6 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.platform.LocalContext
-import com.example.safedriveai.sensors.ActivityState
-import com.example.safedriveai.sensors.SensorDataManager
-
 
 val DarkBackground = Color(0xFF0F172A)
 val CardBackground = Color(0xFF1E293B)
@@ -20,30 +16,20 @@ val EmergencyRed = Color(0xFFEF4444)
 @OptIn(ExperimentalMaterial3Api::class)
 @RequiresApi(Build.VERSION_CODES.O)
 @Composable
-fun DashboardApp(isLandscape: Boolean) {
-    val context = LocalContext.current
-    val sensorData = remember { SensorDataManager(context) }
+fun DashboardScreen(viewModel: DashboardViewModel, isLandscape: Boolean) {
 
-    val x by sensorData.accelX.collectAsState()
-    val y by sensorData.accelY.collectAsState()
-    val location by sensorData.currentLocation.collectAsState()
-    val speed by sensorData.speed.collectAsState()
-    val currentActivity by ActivityState.currentActivity.collectAsState()
-    val amplitude by sensorData.amplitude.collectAsState()
+    val uiState by viewModel.uiState.collectAsState()
 
     DisposableEffect(Unit) {
-        sensorData.startListening() // Arrancamos los sensores al entrar
-        onDispose { sensorData.stopListening()}
+        viewModel.startSensors()
+        onDispose { viewModel.stopSensors() }
     }
 
     Surface(modifier = Modifier.fillMaxSize(), color = DarkBackground) {
         if (isLandscape) {
-            // --- MODO HORIZONTAL PROFESIONAL (3 COLUMNAS) ---
-            DashboardLandscapeLayout(x, y, location, speed, currentActivity, amplitude)
-
+            DashboardLandscapeLayout(uiState)
         } else {
-            // --- MODO VERTICAL (Optimizando espacio) ---
-            DashboardPortraitLayout(x, y, location, speed, currentActivity, amplitude)
+            DashboardPortraitLayout(uiState)
         }
     }
 }

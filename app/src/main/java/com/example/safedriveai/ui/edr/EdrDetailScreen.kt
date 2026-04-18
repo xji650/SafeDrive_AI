@@ -17,7 +17,6 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.PictureAsPdf
 import androidx.compose.material3.Button
-import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Icon
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.ui.unit.dp
@@ -25,22 +24,20 @@ import androidx.compose.material3.Text
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
-import com.example.safedriveai.ui.theme.SuccessGreen
 import java.io.File
-import androidx.compose.foundation.*
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.filled.*
 import androidx.compose.material3.*
-import androidx.compose.runtime.*
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.unit.sp
 import androidx.core.content.FileProvider
-import com.example.safedriveai.ui.theme.*
+import com.example.safedriveai.data.model.EdrModel
+import com.example.safedriveai.ui.edr.components.FeedbackButton
+import com.example.safedriveai.ui.edr.components.TelemetryGraph
 import java.util.Date
 
 @Composable
-fun EDRDetailView(data: List<EDRSnapshot>, file: File, maxG: Float, onBack: () -> Unit) {
+fun EdrDetailScreen(data: List<EdrModel>, file: File, maxG: Float, onBack: () -> Unit) {
     val context = LocalContext.current
 
     // Buscamos el "frame" exacto donde ocurrió el golpe más fuerte para extraer sus datos

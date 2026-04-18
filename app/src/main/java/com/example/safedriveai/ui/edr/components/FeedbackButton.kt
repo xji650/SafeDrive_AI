@@ -1,4 +1,4 @@
-package com.example.safedriveai.ui.edr
+package com.example.safedriveai.ui.edr.components
 
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.layout.Box

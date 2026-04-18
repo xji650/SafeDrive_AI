@@ -1,4 +1,4 @@
-package com.example.safedriveai.ui.dashboard
+package com.example.safedriveai.ui.dashboard.components
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -13,9 +13,8 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Mic
-import androidx.compose.material.icons.filled.Radar
 import androidx.compose.material.icons.filled.Speed
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.Icon
@@ -27,13 +26,15 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.example.safedriveai.ui.dashboard.CardBackground
+import com.example.safedriveai.ui.dashboard.NeonGreen
 
 @Composable
 fun SpeedometerCard(speed: Float, modifier: Modifier = Modifier) {
     Card(
         modifier = modifier.fillMaxWidth(), // Usamos el modifier que entra por parámetro
         colors = CardDefaults.cardColors(containerColor = CardBackground),
-        shape = androidx.compose.foundation.shape.RoundedCornerShape(20.dp) // Añadido para mantener el estilo
+        shape = RoundedCornerShape(20.dp) // Añadido para mantener el estilo
     ) {
         Column(
             modifier = Modifier.fillMaxSize().padding(16.dp),

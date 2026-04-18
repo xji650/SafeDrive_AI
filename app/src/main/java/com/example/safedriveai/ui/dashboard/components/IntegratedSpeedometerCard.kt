@@ -1,13 +1,8 @@
-package com.example.safedriveai.ui.dashboard
+package com.example.safedriveai.ui.dashboard.components
 
-import androidx.compose.foundation.Canvas
-import androidx.compose.ui.graphics.StrokeCap
-import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
@@ -27,15 +22,21 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.sp
+import com.example.safedriveai.ui.dashboard.CardBackground
+import com.example.safedriveai.ui.dashboard.NeonGreen
+import kotlinx.coroutines.delay
+import java.text.SimpleDateFormat
+import java.util.Date
+import java.util.Locale
 
 @Composable
 fun IntegratedSpeedometerCard(speed: Float, modifier: Modifier = Modifier) {
     var currentTime by remember { mutableStateOf("") }
     LaunchedEffect(Unit) {
-        val formatter = java.text.SimpleDateFormat("HH:mm", java.util.Locale.getDefault())
+        val formatter = SimpleDateFormat("HH:mm", Locale.getDefault())
         while (true) {
-            currentTime = formatter.format(java.util.Date())
-            kotlinx.coroutines.delay(1000)
+            currentTime = formatter.format(Date())
+            delay(1000)
         }
     }
 

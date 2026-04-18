@@ -1,4 +1,4 @@
-package com.example.safedriveai.ui.dashboard
+package com.example.safedriveai.ui.dashboard.components
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
@@ -24,6 +24,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
+import com.example.safedriveai.ui.dashboard.NeonGreen
 import kotlinx.coroutines.delay
 import java.text.SimpleDateFormat
 import java.util.Date

@@ -1,16 +1,26 @@
-package com.example.safedriveai.sensors
+package com.example.safedriveai.data.repository
 
 import android.content.Context
-import com.example.safedriveai.ui.edr.BlackBoxManager
-import kotlinx.coroutines.*
+import android.os.Build
+import androidx.annotation.RequiresApi
+import com.example.safedriveai.data.local.BlackBoxManager
+import com.example.safedriveai.domain.usecases.IncidentDetectorUC
+import com.example.safedriveai.sensors.AccelerometerProvider
+import com.example.safedriveai.sensors.AudioProvider
+import com.example.safedriveai.sensors.LocationProvider
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.SupervisorJob
+import kotlinx.coroutines.cancelChildren
+import kotlinx.coroutines.launch
 
-class SensorDataManager(private val context: Context) {
+class SensorRepository(private val context: Context) {
 
     private val accelProvider = AccelerometerProvider(context)
     private val locationProvider = LocationProvider(context)
     private val audioProvider = AudioProvider()
     private val blackBox = BlackBoxManager(context)
-    private val detector = IncidentDetector(context, blackBox)
+    private val detector = IncidentDetectorUC(context, blackBox)
 
     val accelX = accelProvider.accelX
     val accelY = accelProvider.accelY
@@ -21,6 +31,7 @@ class SensorDataManager(private val context: Context) {
 
     private val scope = CoroutineScope(Dispatchers.Main + SupervisorJob())
 
+    @RequiresApi(Build.VERSION_CODES.O)
     fun startListening() {
         accelProvider.start()
         locationProvider.start()

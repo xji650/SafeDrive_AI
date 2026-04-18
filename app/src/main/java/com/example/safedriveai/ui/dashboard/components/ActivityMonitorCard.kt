@@ -1,4 +1,4 @@
-package com.example.safedriveai.ui.dashboard
+package com.example.safedriveai.ui.dashboard.components
 
 import android.location.Location
 import androidx.compose.material.icons.filled.DirectionsCar
@@ -25,6 +25,8 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.example.safedriveai.ui.dashboard.CardBackground
+import com.example.safedriveai.ui.dashboard.NeonGreen
 import java.util.Locale
 
 @Composable

@@ -1,4 +1,4 @@
-package com.example.safedriveai.ui.dashboard
+package com.example.safedriveai.ui.dashboard.components
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -23,9 +23,11 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Mic
 import androidx.compose.material3.Icon
-import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.material3.Surface
+import com.example.safedriveai.ui.dashboard.CardBackground
+import com.example.safedriveai.ui.dashboard.EmergencyRed
+import com.example.safedriveai.ui.dashboard.NeonGreen
 
 @Composable
 fun AudioAuraCard(amplitude: Float, modifier: Modifier = Modifier) {

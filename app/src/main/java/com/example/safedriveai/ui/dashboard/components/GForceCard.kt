@@ -1,4 +1,4 @@
-package com.example.safedriveai.ui.dashboard
+package com.example.safedriveai.ui.dashboard.components
 
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.layout.*
@@ -17,6 +17,8 @@ import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.example.safedriveai.ui.dashboard.CardBackground
+import com.example.safedriveai.ui.dashboard.NeonGreen
 
 @Composable
 fun GForceCard(accelX: Float, accelY: Float, modifier: Modifier = Modifier) { // Recibe los datos reales

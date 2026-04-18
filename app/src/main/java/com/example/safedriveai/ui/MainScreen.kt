@@ -10,7 +10,6 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Build
 import androidx.compose.material.icons.filled.Home
 import androidx.compose.material.icons.filled.Person
-import androidx.compose.material.icons.filled.Place
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
@@ -31,8 +30,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 import androidx.navigation.compose.rememberNavController
-import com.example.safedriveai.ui.dashboard.DashboardApp
-import com.example.safedriveai.ui.diagnostic.DiagnosticApp
+import com.example.safedriveai.ui.dashboard.DashboardScreen
 import com.example.safedriveai.utils.RotationAwareContent
 import com.example.safedriveai.utils.rememberDeviceRotation
 import androidx.compose.animation.AnimatedVisibility
@@ -47,17 +45,18 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.core.view.WindowCompat
 import androidx.core.view.WindowInsetsCompat
 import androidx.core.view.WindowInsetsControllerCompat
-import com.example.safedriveai.ui.edr.EDRApp
-
-enum class AppDestinations {
-    DASHBOARD, DIAGNOSTIC, EDR, USER_PREFERENCE
-}
-
-data class NavigationItem(
-    val destination: AppDestinations,
-    val icon: ImageVector,
-    val label: String
-)
+import androidx.lifecycle.ViewModel
+import androidx.lifecycle.viewmodel.compose.viewModel
+import com.example.safedriveai.data.local.BlackBoxManager
+import com.example.safedriveai.ui.edr.EdrScreen
+import com.example.safedriveai.ui.edr.EdrViewModel
+import androidx.lifecycle.ViewModelProvider
+import com.example.safedriveai.data.model.AppDestinations
+import com.example.safedriveai.data.model.NavigationItem
+import com.example.safedriveai.ui.dashboard.DashboardViewModel
+import com.example.safedriveai.data.repository.SensorRepository
+import com.example.safedriveai.ui.diagnostic.DiagnosticScreen
+import com.example.safedriveai.ui.diagnostic.DiagnosticViewModel
 
 @RequiresApi(Build.VERSION_CODES.O)
 @OptIn(ExperimentalMaterial3Api::class)
@@ -70,6 +69,27 @@ fun SafeDriveAIApp(navController: NavController) {
     var isFullScreen by remember { mutableStateOf(false) }
     val context = LocalContext.current
     val activity = context as? Activity
+
+    val edrViewModel: EdrViewModel = viewModel(
+        factory = object : ViewModelProvider.Factory {
+            override fun <T : ViewModel> create(modelClass: Class<T>): T {
+                // Le pasamos el applicationContext para evitar fugas de memoria
+                val blackBoxManager = BlackBoxManager(context.applicationContext)
+                return EdrViewModel(blackBoxManager) as T
+            }
+        }
+    )
+
+    val dashboardViewModel: DashboardViewModel = viewModel(
+        factory = object : ViewModelProvider.Factory {
+            override fun <T : ViewModel> create(modelClass: Class<T>): T {
+                val sensorRepository = SensorRepository(context.applicationContext)
+                return DashboardViewModel(sensorRepository) as T
+            }
+        }
+    )
+
+    val diagnosticViewModel: DiagnosticViewModel = viewModel()
 
     // --- 2. AUTOMATIZACIÓN INTELIGENTE ---
     LaunchedEffect(isFullScreen) {
@@ -155,9 +175,12 @@ fun SafeDriveAIApp(navController: NavController) {
                 }
         ) {
             when (selectedScreen) {
-                AppDestinations.DASHBOARD -> DashboardApp(isLandscape = currentRotation.isLandscape)
-                AppDestinations.DIAGNOSTIC -> DiagnosticApp()
-                AppDestinations.EDR -> EDRApp()
+                AppDestinations.DASHBOARD -> DashboardScreen(
+                    viewModel = dashboardViewModel,
+                    isLandscape = currentRotation.isLandscape
+                )
+                AppDestinations.DIAGNOSTIC -> DiagnosticScreen(viewModel = diagnosticViewModel)
+                AppDestinations.EDR -> EdrScreen(viewModel = edrViewModel)
                 AppDestinations.USER_PREFERENCE -> UserPreferenceScreen()
             }
         }

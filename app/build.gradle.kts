@@ -55,7 +55,6 @@ dependencies {
     implementation(libs.androidx.material3)
     implementation(libs.osmdroid.android)
     implementation(libs.androidx.compose.foundation.layout)
-    implementation(libs.play.services.location)
     implementation(libs.gson)
     implementation(libs.listenablefuture)
     implementation(libs.androidx.compose.runtime)
@@ -68,4 +67,7 @@ dependencies {
     androidTestImplementation(libs.androidx.compose.ui.test.junit4)
     debugImplementation(libs.androidx.compose.ui.tooling)
     debugImplementation(libs.androidx.compose.ui.test.manifest)
+
+    // ── Google Location Services API ─────────────────────────────────────────
+    implementation(libs.play.services.location.v2120)
 }

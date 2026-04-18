@@ -1,20 +1,23 @@
-package com.example.safedriveai.sensors
+package com.example.safedriveai.domain.usecases
 
-import android.content.Context
-import android.hardware.Sensor
-import android.hardware.SensorManager
-import kotlinx.coroutines.suspendCancellableCoroutine
-import kotlin.coroutines.resume
-import kotlin.math.abs
-import com.example.safedriveai.ui.diagnostic.DiagnosticStatus // Importa tu enum de la UI
 import android.Manifest
+import android.content.Context
 import android.content.pm.PackageManager
+import android.hardware.Sensor
+import android.hardware.SensorEvent
+import android.hardware.SensorEventListener
+import android.hardware.SensorManager
+import android.location.LocationManager
 import android.net.ConnectivityManager
 import android.net.NetworkCapabilities
 import androidx.core.content.ContextCompat
+import com.example.safedriveai.data.model.DiagnosticStatus
+import com.example.safedriveai.sensors.SensorChecker
+import kotlinx.coroutines.suspendCancellableCoroutine
+import kotlin.coroutines.resume
+import kotlin.math.abs
 
-
-object DiagnosticEngine {
+object DiagnosticExecutorUC {
 
     suspend fun runDiagnosticOn(context: Context, sensorId: String): Pair<DiagnosticStatus, String> {
         // 1. Verificación de Hardware (Físico)
@@ -38,18 +41,31 @@ object DiagnosticEngine {
                 // Chequeo ACTIVO: Mira si los valores se vuelven locos
                 val gyro = sensorManager.getDefaultSensor(Sensor.TYPE_GYROSCOPE)
                 suspendCancellableCoroutine { continuation ->
-                    val listener = object : android.hardware.SensorEventListener {
-                        override fun onSensorChanged(event: android.hardware.SensorEvent?) {
+                    val listener = object : SensorEventListener {
+                        override fun onSensorChanged(event: SensorEvent?) {
                             event?.let {
-                                val x = abs(it.values[0]); val y = abs(it.values[1]); val z = abs(it.values[2])
+                                val x = abs(it.values[0]);
+                                val y = abs(it.values[1]);
+                                val z = abs(it.values[2])
                                 sensorManager.unregisterListener(this)
                                 if (x > 0.2f || y > 0.2f || z > 0.2f) {
-                                    if (continuation.isActive) continuation.resume(Pair(DiagnosticStatus.WARNING, "Vibración detectada. Fija el móvil."))
+                                    if (continuation.isActive) continuation.resume(
+                                        Pair(
+                                            DiagnosticStatus.WARNING,
+                                            "Vibración detectada. Fija el móvil."
+                                        )
+                                    )
                                 } else {
-                                    if (continuation.isActive) continuation.resume(Pair(DiagnosticStatus.OK, "Calibración estática perfecta."))
+                                    if (continuation.isActive) continuation.resume(
+                                        Pair(
+                                            DiagnosticStatus.OK,
+                                            "Calibración estática perfecta."
+                                        )
+                                    )
                                 }
                             }
                         }
+
                         override fun onAccuracyChanged(sensor: Sensor?, accuracy: Int) {}
                     }
                     sensorManager.registerListener(listener, gyro, SensorManager.SENSOR_DELAY_UI)
@@ -58,8 +74,8 @@ object DiagnosticEngine {
             }
 
             "GPS" -> {
-                val locationManager = context.getSystemService(Context.LOCATION_SERVICE) as android.location.LocationManager
-                val isEnabled = locationManager.isProviderEnabled(android.location.LocationManager.GPS_PROVIDER)
+                val locationManager = context.getSystemService(Context.LOCATION_SERVICE) as LocationManager
+                val isEnabled = locationManager.isProviderEnabled(LocationManager.GPS_PROVIDER)
                 val hasPermission = ContextCompat.checkSelfPermission(context, Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED
 
                 if (!hasPermission) Pair(DiagnosticStatus.ERROR, "Falta permiso de ubicación.")

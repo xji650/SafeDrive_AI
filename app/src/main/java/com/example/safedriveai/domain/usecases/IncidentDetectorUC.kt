@@ -1,12 +1,12 @@
-package com.example.safedriveai.sensors
+package com.example.safedriveai.domain.usecases
 
 import android.content.Context
 import android.os.Build
 import android.util.Log
 import androidx.annotation.RequiresApi
-import com.example.safedriveai.ui.edr.BlackBoxManager
+import com.example.safedriveai.data.local.BlackBoxManager
 
-class IncidentDetector(
+class IncidentDetectorUC(
     private val context: Context,
     private val blackBox: BlackBoxManager
 ) {
@@ -34,7 +34,7 @@ class IncidentDetector(
     }
 
     private fun executeEmergencyProtocol() {
-        Log.e("SafeDriveAI", "¡Impacto Detectado por IncidentDetector!")
+        Log.e("SafeDriveAI", "¡Impacto Detectado por IncidentDetectorUC!")
         blackBox.saveEventToDisk()
         // Aquí podría disparar un Callback hacia el ViewModel para mostrar la alerta SOS
     }

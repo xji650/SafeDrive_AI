@@ -1,4 +1,4 @@
-package com.example.safedriveai.ui.dashboard
+package com.example.safedriveai.ui.dashboard.components
 
 import android.R
 import android.annotation.SuppressLint
@@ -19,7 +19,8 @@ import org.osmdroid.views.MapView
 import androidx.compose.foundation.isSystemInDarkTheme
 import org.osmdroid.views.overlay.TilesOverlay
 import org.osmdroid.config.Configuration as OsmConfig // <--- Importante para el user agent
-import androidx.compose.ui.res.painterResource
+import androidx.core.content.ContextCompat
+import com.example.safedriveai.ui.dashboard.CardBackground
 import org.osmdroid.views.overlay.Marker
 
 @SuppressLint("RememberReturnType")
@@ -44,7 +45,7 @@ fun MapSecurityCard(
     val carMarker = remember {
         Marker(mapView).apply {
             title = "Tu Vehículo"
-            icon = androidx.core.content.ContextCompat.getDrawable(context, android.R.drawable.ic_menu_compass)
+            icon = ContextCompat.getDrawable(context, R.drawable.ic_menu_compass)
             setAnchor(Marker.ANCHOR_CENTER, Marker.ANCHOR_CENTER)
         }
     }
