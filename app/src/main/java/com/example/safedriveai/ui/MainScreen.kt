@@ -1,7 +1,12 @@
 package com.example.safedriveai.ui
 
+import android.app.Activity
 import android.os.Build
+import androidx.lifecycle.ViewModel
 import androidx.annotation.RequiresApi
+import androidx.core.view.WindowCompat
+import androidx.core.view.WindowInsetsCompat
+import androidx.core.view.WindowInsetsControllerCompat
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
@@ -27,33 +32,25 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import androidx.navigation.NavController
-import androidx.navigation.compose.rememberNavController
-import com.example.safedriveai.ui.dashboard.DashboardScreen
-import com.example.safedriveai.utils.RotationAwareContent
-import com.example.safedriveai.utils.rememberDeviceRotation
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.slideInVertically
 import androidx.compose.animation.slideOutVertically
 import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.runtime.*
 import androidx.compose.ui.input.pointer.pointerInput
-import android.app.Activity
 import androidx.compose.material.icons.filled.Report
 import androidx.compose.ui.platform.LocalContext
-import androidx.core.view.WindowCompat
-import androidx.core.view.WindowInsetsCompat
-import androidx.core.view.WindowInsetsControllerCompat
-import androidx.lifecycle.ViewModel
-import androidx.lifecycle.viewmodel.compose.viewModel
-import com.example.safedriveai.data.local.BlackBoxManager
+import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.navigation.NavController
+import androidx.navigation.compose.rememberNavController
+import com.example.safedriveai.ui.dashboard.DashboardScreen
+import com.example.safedriveai.utils.RotationAwareContent
+import com.example.safedriveai.utils.rememberDeviceRotation
 import com.example.safedriveai.ui.edr.EdrScreen
 import com.example.safedriveai.ui.edr.EdrViewModel
-import androidx.lifecycle.ViewModelProvider
 import com.example.safedriveai.domain.model.AppDestinations
 import com.example.safedriveai.domain.model.NavigationItem
 import com.example.safedriveai.ui.dashboard.DashboardViewModel
-import com.example.safedriveai.data.repository.SensorRepository
 import com.example.safedriveai.ui.diagnostic.DiagnosticScreen
 import com.example.safedriveai.ui.diagnostic.DiagnosticViewModel
 
@@ -69,26 +66,9 @@ fun SafeDriveAIApp(navController: NavController) {
     val context = LocalContext.current
     val activity = context as? Activity
 
-    val edrViewModel: EdrViewModel = viewModel(
-        factory = object : ViewModelProvider.Factory {
-            override fun <T : ViewModel> create(modelClass: Class<T>): T {
-                // Le pasamos el applicationContext para evitar fugas de memoria
-                val blackBoxManager = BlackBoxManager(context.applicationContext)
-                return EdrViewModel(blackBoxManager) as T
-            }
-        }
-    )
-
-    val dashboardViewModel: DashboardViewModel = viewModel(
-        factory = object : ViewModelProvider.Factory {
-            override fun <T : ViewModel> create(modelClass: Class<T>): T {
-                val sensorRepository = SensorRepository.getInstance(context)
-                return DashboardViewModel(sensorRepository) as T
-            }
-        }
-    )
-
-    val diagnosticViewModel: DiagnosticViewModel = viewModel()
+    val edrViewModel: EdrViewModel = hiltViewModel()
+    val dashboardViewModel: DashboardViewModel = hiltViewModel()
+    val diagnosticViewModel: DiagnosticViewModel = hiltViewModel()
 
     // --- 2. AUTOMATIZACIÓN INTELIGENTE ---
     LaunchedEffect(isFullScreen) {

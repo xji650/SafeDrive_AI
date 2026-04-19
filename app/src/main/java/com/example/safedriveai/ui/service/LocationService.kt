@@ -6,16 +6,16 @@ import android.os.Build
 import android.os.IBinder
 import androidx.core.app.NotificationCompat
 import com.example.safedriveai.data.repository.SensorRepository
+import dagger.hilt.android.AndroidEntryPoint
+import javax.inject.Inject
 
+@AndroidEntryPoint
 class LocationService : Service() {
-
-    private lateinit var repository: SensorRepository
+    @Inject lateinit var repository: SensorRepository
     private val CHANNEL_ID = "SafeDrive_Channel"
 
     override fun onCreate() {
         super.onCreate()
-        // ¡AQUÍ ESTÁ LA MAGIA! Pedimos la instancia ÚNICA del repositorio
-        repository = SensorRepository.getInstance(applicationContext)
         createNotificationChannel()
     }
 

@@ -17,11 +17,17 @@ import androidx.lifecycle.ViewModel
 import com.example.safedriveai.domain.model.PermissionItemData
 import com.example.safedriveai.domain.model.PermissionState
 import com.example.safedriveai.sensors.SensorChecker
+import dagger.hilt.android.lifecycle.HiltViewModel
+import dagger.hilt.android.qualifiers.ApplicationContext
+import javax.inject.Inject
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 
-class PermissionViewModel(private val context: Context) : ViewModel() {
+@HiltViewModel
+class PermissionViewModel @Inject constructor(
+    @ApplicationContext private val context: Context
+) : ViewModel() {
 
     private val _uiState = MutableStateFlow(PermissionState())
     val uiState = _uiState.asStateFlow()

@@ -4,13 +4,18 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.safedriveai.data.local.BlackBoxManager
 import com.example.safedriveai.domain.model.EdrModel // Asegúrate de tener este import
+import dagger.hilt.android.lifecycle.HiltViewModel
+import jakarta.inject.Inject
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 import java.io.File
 
-class EdrViewModel(private val blackBoxManager: BlackBoxManager) : ViewModel() {
+@HiltViewModel
+class EdrViewModel @Inject constructor(
+    private val blackBoxManager: BlackBoxManager
+) : ViewModel() {
 
     // Estado 1: La lista de archivos encontrados
     private val _incidentFiles = MutableStateFlow<List<File>>(emptyList())

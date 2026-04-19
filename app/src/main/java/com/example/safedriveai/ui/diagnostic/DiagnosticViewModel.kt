@@ -18,8 +18,11 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
+import dagger.hilt.android.lifecycle.HiltViewModel
+import javax.inject.Inject
 
-class DiagnosticViewModel : ViewModel() {
+@HiltViewModel
+class DiagnosticViewModel @Inject constructor() : ViewModel() {
 
     // 1. Mantenemos el estado de la lista
     private val _diagnosticItems = MutableStateFlow(

@@ -7,10 +7,14 @@ import androidx.annotation.RequiresApi
 import com.example.safedriveai.domain.model.EdrModel
 import com.google.gson.Gson
 import com.google.gson.reflect.TypeToken
+import dagger.hilt.android.qualifiers.ApplicationContext
+import javax.inject.Inject
 import java.io.File
 import java.time.LocalDateTime
 
-class BlackBoxManager(private val context: Context) {
+class BlackBoxManager @Inject constructor (
+    @ApplicationContext private val context: Context
+) {
     // 30 segundos de datos a 10 registros por segundo = 300 puntos
     private val buffer = mutableListOf<EdrModel>()
     private val MAX_SAMPLES = 300

@@ -8,10 +8,14 @@ import androidx.lifecycle.viewModelScope
 import com.example.safedriveai.domain.model.DashboardModel
 import com.example.safedriveai.data.repository.SensorRepository
 import com.example.safedriveai.sensors.ActivityState
+import dagger.hilt.android.lifecycle.HiltViewModel
+import javax.inject.Inject
 import kotlinx.coroutines.flow.*
 
-class DashboardViewModel(private val sensorRepository: SensorRepository) : ViewModel() {
-
+@HiltViewModel
+class DashboardViewModel @Inject constructor(
+    private val sensorRepository: SensorRepository
+) : ViewModel() {
     val uiState: StateFlow<DashboardModel> = combine(
         sensorRepository.accelX,        // Índice 0
         sensorRepository.accelY,        // Índice 1
