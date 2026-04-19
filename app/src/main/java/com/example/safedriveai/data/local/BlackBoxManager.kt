@@ -18,15 +18,28 @@ class BlackBoxManager @Inject constructor (
     // 30 segundos de datos a 10 registros por segundo = 300 puntos
     private val buffer = mutableListOf<EdrModel>()
     private val MAX_SAMPLES = 300
-
     @RequiresApi(Build.VERSION_CODES.O)
-    fun addPoint(g: Float, s: Float, a: Float) {
+    fun addPoint(g: Float, s: Float, a: Float, lat: Double, lon: Double) { // <-- 1. PIDE LAS COORDENADAS AQUÍ
         if (buffer.size >= MAX_SAMPLES) buffer.removeAt(0)
-        buffer.add(EdrModel(LocalDateTime.now().toString(), g, s, a))
+
+        val currentMillis = System.currentTimeMillis()
+
+        buffer.add(
+            EdrModel(
+                time = LocalDateTime.now().toString(),
+                rawTimestamp = currentMillis, // <-- El número largo para buscar archivos
+                gForce = g,
+                speed = s,
+                audioAmplitude = a,
+                latitude = lat,       // <-- La que recibimos arriba
+                longitude = lon,      // <-- La que recibimos arriba
+                isSynced = false      // <-- Por defecto false porque aún no ha subido a Firebase
+            )
+        )
     }
 
-    fun saveEventToDisk() {
-        val fileName = "EDR_EVENT_${System.currentTimeMillis()}.json"
+    fun saveEventToDisk(timestamp: Long) {
+        val fileName = "EDR_EVENT_${timestamp}.json" // <-- USA EL PARÁMETRO
         val file = File(context.filesDir, fileName)
 
         // Usamos Gson para convertir la lista en un JSON estructurado

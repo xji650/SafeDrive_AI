@@ -5,21 +5,26 @@ import androidx.lifecycle.viewModelScope
 import com.example.safedriveai.data.local.BlackBoxManager
 import com.example.safedriveai.data.local.entity.IncidentEntity
 import com.example.safedriveai.domain.model.EdrModel
+import com.example.safedriveai.data.local.mapper.toDomainModel
 import com.example.safedriveai.domain.repository.IncidentRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
-import javax.inject.Inject // <-- CORREGIDO: javax en lugar de jakarta
+import javax.inject.Inject
 import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
 import java.io.File
 
 @HiltViewModel
 class EdrViewModel @Inject constructor(
-    private val repository: IncidentRepository, // <-- NUEVO: Inyectamos Room
+    private val repository: IncidentRepository,
     private val blackBoxManager: BlackBoxManager
 ) : ViewModel() {
 
     // Cada vez que se guarde un choque, esta lista se actualizará SOLA.
-    val incidentsHistory: StateFlow<List<IncidentEntity>> = repository.getAllIncidents()
+    val incidentsHistory: StateFlow<List<EdrModel>> = repository.getAllIncidents()
+        .map { listaEntidades ->
+            // Traducimos cada entidad de la lista a nuestro modelo de pantalla
+            listaEntidades.map { entidad -> entidad.toDomainModel() }
+        }
         .stateIn(
             scope = viewModelScope,
             started = SharingStarted.WhileSubscribed(5000),
@@ -33,11 +38,12 @@ class EdrViewModel @Inject constructor(
     val selectedEventData: StateFlow<List<EdrModel>?> = _selectedEventData.asStateFlow()
 
     // Ahora para abrir el detalle, buscamos el archivo JSON que coincida con el timestamp
-    fun openDetailsFromEntity(incident: IncidentEntity) {
+    fun openDetailsFromEntity(incident: EdrModel) {
         val files = blackBoxManager.getSavedEvents()
-        // Buscamos un archivo que contenga el timestamp en su nombre
-        val targetFile = files.find { it.name.contains(incident.timestamp.toString()) }
-            ?: files.firstOrNull() // Si no lo encuentra, cogemos el primero por seguridad
+
+        // AHORA BUSCAMOS POR EL TIMESTAMP EXACTO, NO POR LA FUERZA G
+        val targetFile = files.find { it.name.contains(incident.rawTimestamp.toString()) }
+            ?: files.firstOrNull()
 
         targetFile?.let { file ->
             _selectedFile.value = file

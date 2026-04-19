@@ -28,12 +28,13 @@ class IncidentDetectorUC @Inject constructor (
         val currentTime = System.currentTimeMillis()
 
         // 1. Alimentar la Caja Negra siempre
-        blackBox.addPoint(g, speed, amplitude)
+        // CÁMBIALO POR ESTO:
+        blackBox.addPoint(g, speed, amplitude, lat, lon)
 
         // 2. Evaluar Trigger de Emergencia (CU-03)
         if (shouldTriggerEvent(g, currentTime)) {
             // Pasamos los datos al protocolo para que pueda guardarlos
-            executeEmergencyProtocol(g, speed, lat, lon, currentTime)
+            executeEmergencyProtocol(g, amplitude, speed, lat, lon, currentTime)
             lastCrashTime = currentTime
         }
     }
@@ -42,16 +43,17 @@ class IncidentDetectorUC @Inject constructor (
         return g > CRITICAL_G_THRESHOLD && (currentTime - lastCrashTime > COOLDOWN_MS)
     }
 
-    private fun executeEmergencyProtocol(g: Float, speed: Float, lat: Double, lon: Double, time: Long) {
-        Log.e("SafeDriveAI", "¡Impacto Detectado! Guardando en JSON y Room...")
+    private fun executeEmergencyProtocol(g: Float, amplitude: Float, speed: Float, lat: Double, lon: Double, time: Long) {
+        Log.e("SafeDriveAI", "¡Impacto Detectado! Guardando en JSON")
 
-        // 1. Guardar JSON (Caja Negra técnica)
-        blackBox.saveEventToDisk()
+        // 1. Guardar JSON (¡AHORA LE PASAMOS EL MISMO 'time' EXACTO!)
+        blackBox.saveEventToDisk(time)
 
-        // 2. Guardar en ROOM (Para que aparezca en tu lista de EDR)
+        // 2. Guardar en ROOM (Usa el mismo 'time')
         scope.launch {
             val incident = IncidentEntity(
                 timestamp = time,
+                amplitudeMicrophone = amplitude,
                 maxGForce = g,
                 speedAtImpact = speed,
                 latitude = lat,

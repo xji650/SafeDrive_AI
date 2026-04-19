@@ -1,5 +1,6 @@
 package com.example.safedriveai.data.local.entity
 
+import android.media.MicrophoneInfo
 import androidx.room.Entity
 import androidx.room.PrimaryKey
 
@@ -8,6 +9,7 @@ data class IncidentEntity(
     @PrimaryKey(autoGenerate = true)
     val id: Int = 0,
     val timestamp: Long, // Cuándo ocurrió el accidente
+    val amplitudeMicrophone: Float,
     val maxGForce: Float, // Fuerza del impacto
     val speedAtImpact: Float, // A qué velocidad iba
     val latitude: Double, // Dónde ocurrió
