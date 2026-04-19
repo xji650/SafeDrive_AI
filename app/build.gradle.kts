@@ -3,6 +3,7 @@ plugins {
     alias(libs.plugins.kotlin.compose)
     id("com.google.devtools.ksp") version "2.3.6"
     id("com.google.dagger.hilt.android") version "2.59.2"
+    id("com.google.gms.google-services")
 }
 
 android {
@@ -93,4 +94,7 @@ dependencies {
     // ── FIREBASE / BACKEND ────────────────────────────────
     implementation(libs.firebase.firestore)
     implementation(libs.firebase.auth)
+    implementation(platform(libs.firebase.bom))
+    implementation(libs.firebase.analytics)
+    implementation(libs.firebase.storage.ktx)
 }

@@ -10,6 +10,7 @@ import com.example.safedriveai.data.local.dao.IncidentDao
 import com.example.safedriveai.data.repository.IncidentRepositoryImpl
 import com.example.safedriveai.domain.repository.IncidentRepository
 import com.google.firebase.firestore.FirebaseFirestore
+import com.google.firebase.storage.FirebaseStorage
 import dagger.Provides
 import dagger.hilt.android.qualifiers.ApplicationContext
 import javax.inject.Singleton
@@ -24,6 +25,12 @@ class AppModule {
         return FirebaseFirestore.getInstance()
     }
 
+    @Provides
+    @Singleton
+    fun provideFirebaseStorage(): FirebaseStorage {
+        return FirebaseStorage.getInstance()
+    }
+
     // 2. EL ALMACÉN (Room Database)
     @Provides
     @Singleton
@@ -32,7 +39,7 @@ class AppModule {
                 context,
                 AppDatabase::class.java,
                 "safedrive_db"
-        ).fallbackToDestructiveMigration(false)
+        ).fallbackToDestructiveMigration()
             .build()
     }
 
@@ -47,7 +54,11 @@ class AppModule {
     @Singleton
     fun provideIncidentRepository(
         dao: IncidentDao,
+        firestore: FirebaseFirestore,
+        storage: FirebaseStorage,
+        @ApplicationContext context: Context // <-- 1. PEDIMOS EL CONTEXTO A HILT
     ): IncidentRepository {
-        return IncidentRepositoryImpl(dao)
+        // 2. SE LO ENTREGAMOS AL REPOSITORIO (LOS 4 PARÁMETROS)
+        return IncidentRepositoryImpl(dao, firestore, storage, context)
     }
 }
