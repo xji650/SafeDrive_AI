@@ -1,6 +1,8 @@
 plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.kotlin.compose)
+    id("com.google.devtools.ksp") version "2.3.6"
+    id("com.google.dagger.hilt.android") version "2.59.2"
 }
 
 android {
@@ -70,4 +72,25 @@ dependencies {
 
     // ── Google Location Services API ─────────────────────────────────────────
     implementation(libs.play.services.location.v2120)
+
+    // ── DATA PERSISTENCE (Room) ───────────────────────────
+    val roomVersion = "2.6.1"
+    implementation(libs.androidx.room.runtime)
+    implementation(libs.androidx.room.ktx)
+    ksp(libs.androidx.room.compiler) // Usamos KSP, no kapt
+
+    // ── PUENTE ENTRE HILT Y JETPACK COMPOSE ───────────────────────
+    implementation(libs.androidx.hilt.navigation.compose)
+
+    // ── DEPENDENCY INJECTION (Hilt) ───────────────────────
+    val hiltVersion = "2.59.2"
+    implementation(libs.hilt.android)
+    ksp(libs.hilt.android.compiler)
+
+    // ── COROUTINES (Necesarias para Room y Backend) ───────
+    implementation(libs.kotlinx.coroutines.android)
+
+    // ── FIREBASE / BACKEND ────────────────────────────────
+    implementation(libs.firebase.firestore)
+    implementation(libs.firebase.auth)
 }
