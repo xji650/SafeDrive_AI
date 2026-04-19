@@ -2,7 +2,6 @@ package com.example.safedriveai.ui
 
 import android.app.Activity
 import android.os.Build
-import androidx.lifecycle.ViewModel
 import androidx.annotation.RequiresApi
 import androidx.core.view.WindowCompat
 import androidx.core.view.WindowInsetsCompat

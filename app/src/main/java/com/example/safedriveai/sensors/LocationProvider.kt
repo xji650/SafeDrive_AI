@@ -11,7 +11,7 @@ import android.util.Log
 
 class LocationProvider(private val context: Context) {
 
-    // 1. Usamos la API de Google Play Services según el PDF
+    // 1. Usamos la API de Google Play
     private val fusedLocationClient = LocationServices.getFusedLocationProviderClient(context)
 
     private val _speed = MutableStateFlow(0f)

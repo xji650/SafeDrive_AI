@@ -3,7 +3,6 @@ package com.example.safedriveai.data.repository
 import android.content.Context
 import android.os.Build
 import androidx.annotation.RequiresApi
-import com.example.safedriveai.data.local.BlackBoxManager
 import com.example.safedriveai.domain.usecases.IncidentDetectorUC
 import com.example.safedriveai.sensors.AccelerometerProvider
 import com.example.safedriveai.sensors.AudioProvider
@@ -20,7 +19,6 @@ import javax.inject.Singleton
 @Singleton
 class SensorRepository @Inject constructor(
     @ApplicationContext private val context: Context,
-    private val blackBox: BlackBoxManager,
     private val detector: IncidentDetectorUC
 ) {
 
@@ -44,7 +42,7 @@ class SensorRepository @Inject constructor(
         audioProvider.start()
 
         scope.launch {
-            accelProvider.totalG.collect { g ->
+            totalG.collect { g ->
                 val location = currentLocation.value // Obtenemos la última posición conocida
                 detector.processTelemetry(
                     g,
