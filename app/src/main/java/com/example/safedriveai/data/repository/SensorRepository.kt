@@ -20,13 +20,13 @@ import javax.inject.Singleton
 @Singleton
 class SensorRepository @Inject constructor(
     @ApplicationContext private val context: Context,
-    private val blackBox: BlackBoxManager
+    private val blackBox: BlackBoxManager,
+    private val detector: IncidentDetectorUC
 ) {
 
     private val accelProvider = AccelerometerProvider(context)
     private val locationProvider = LocationProvider(context)
     private val audioProvider = AudioProvider()
-    private val detector = IncidentDetectorUC(context, blackBox)
 
     val accelX = accelProvider.accelX
     val accelY = accelProvider.accelY
@@ -45,7 +45,14 @@ class SensorRepository @Inject constructor(
 
         scope.launch {
             accelProvider.totalG.collect { g ->
-                detector.processTelemetry(g, speed.value, amplitude.value)
+                val location = currentLocation.value // Obtenemos la última posición conocida
+                detector.processTelemetry(
+                    g,
+                    speed.value,
+                    amplitude.value,
+                    location?.latitude ?: 0.0,
+                    location?.longitude ?: 0.0
+                )
             }
         }
     }

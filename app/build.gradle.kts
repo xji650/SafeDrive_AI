@@ -74,10 +74,10 @@ dependencies {
     implementation(libs.play.services.location.v2120)
 
     // ── DATA PERSISTENCE (Room) ───────────────────────────
-    val roomVersion = "2.6.1"
-    implementation(libs.androidx.room.runtime)
-    implementation(libs.androidx.room.ktx)
-    ksp(libs.androidx.room.compiler) // Usamos KSP, no kapt
+    val roomVersion = "2.7.0"
+    implementation("androidx.room:room-runtime:$roomVersion") // Cambiado
+    implementation("androidx.room:room-ktx:$roomVersion")     // Cambiado
+    ksp("androidx.room:room-compiler:$roomVersion")
 
     // ── PUENTE ENTRE HILT Y JETPACK COMPOSE ───────────────────────
     implementation(libs.androidx.hilt.navigation.compose)

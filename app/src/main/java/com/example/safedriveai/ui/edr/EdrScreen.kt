@@ -10,20 +10,15 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
-import com.example.safedriveai.ui.edr.components.IncidentCard
+import com.example.safedriveai.ui.edr.components.IncidentRoomCard
 import kotlin.collections.maxByOrNull
 
 @Composable
 fun EdrScreen(viewModel: EdrViewModel) {
     // 1. La Vista "escucha" los estados del ViewModel
-    val incidentFiles by viewModel.incidentFiles.collectAsState()
+    val incidents by viewModel.incidentsHistory.collectAsState()
     val selectedFile by viewModel.selectedFile.collectAsState()
     val realData by viewModel.selectedEventData.collectAsState()
-
-    LaunchedEffect(Unit) {
-        viewModel.loadFile()
-    }
-
 
     // Fondo nativo del sistema
     Box(modifier = Modifier.fillMaxSize().background(MaterialTheme.colorScheme.background)) {
@@ -47,7 +42,7 @@ fun EdrScreen(viewModel: EdrViewModel) {
 
                 Spacer(modifier = Modifier.height(24.dp))
 
-                if (incidentFiles.isEmpty()) {
+                if (incidents.isEmpty()) {
                     Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
                         Text(
                             text = "No hay registros disponibles.",
@@ -56,10 +51,16 @@ fun EdrScreen(viewModel: EdrViewModel) {
                         )
                     }
                 } else {
-                    LazyColumn(verticalArrangement = Arrangement.spacedBy(12.dp)) {
-                        items(incidentFiles) { file ->
-                            // En lugar de guardar el estado aquí, se lo decimos al ViewModel
-                            IncidentCard(file, onOpen = { viewModel.openDetails(file) })
+                    LazyColumn(
+                        modifier = Modifier.fillMaxSize(),
+                        verticalArrangement = Arrangement.spacedBy(12.dp),
+                        contentPadding = PaddingValues(bottom = 16.dp)
+                    ) {
+                        items(incidents) { incident ->
+                            IncidentRoomCard(
+                                incident = incident,
+                                onOpen = { viewModel.openDetailsFromEntity(incident) }
+                            )
                         }
                     }
                 }
