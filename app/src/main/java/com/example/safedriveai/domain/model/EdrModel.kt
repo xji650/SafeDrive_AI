@@ -1,4 +1,4 @@
-package com.example.safedriveai.data.model
+package com.example.safedriveai.domain.model
 
 data class EdrModel(
     val time: String,

@@ -3,7 +3,7 @@ package com.example.safedriveai.ui.edr
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.safedriveai.data.local.BlackBoxManager
-import com.example.safedriveai.data.model.EdrModel // Asegúrate de tener este import
+import com.example.safedriveai.domain.model.EdrModel // Asegúrate de tener este import
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow

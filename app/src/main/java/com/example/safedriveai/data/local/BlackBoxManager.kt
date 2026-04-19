@@ -4,7 +4,7 @@ import android.content.Context
 import android.os.Build
 import android.util.Log
 import androidx.annotation.RequiresApi
-import com.example.safedriveai.data.model.EdrModel
+import com.example.safedriveai.domain.model.EdrModel
 import com.google.gson.Gson
 import com.google.gson.reflect.TypeToken
 import java.io.File

@@ -25,7 +25,6 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.graphicsLayer
-import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
@@ -51,8 +50,8 @@ import com.example.safedriveai.data.local.BlackBoxManager
 import com.example.safedriveai.ui.edr.EdrScreen
 import com.example.safedriveai.ui.edr.EdrViewModel
 import androidx.lifecycle.ViewModelProvider
-import com.example.safedriveai.data.model.AppDestinations
-import com.example.safedriveai.data.model.NavigationItem
+import com.example.safedriveai.domain.model.AppDestinations
+import com.example.safedriveai.domain.model.NavigationItem
 import com.example.safedriveai.ui.dashboard.DashboardViewModel
 import com.example.safedriveai.data.repository.SensorRepository
 import com.example.safedriveai.ui.diagnostic.DiagnosticScreen

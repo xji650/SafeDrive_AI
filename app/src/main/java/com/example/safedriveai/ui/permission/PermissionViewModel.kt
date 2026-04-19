@@ -6,6 +6,7 @@ import android.content.pm.PackageManager
 import android.net.ConnectivityManager
 import android.net.NetworkCapabilities
 import android.os.Build
+import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.DirectionsRun
 import androidx.compose.material.icons.filled.LocationOn
 import androidx.compose.material.icons.filled.Mic
@@ -13,8 +14,8 @@ import androidx.compose.material.icons.filled.Notifications
 import androidx.compose.material.icons.filled.Phone
 import androidx.core.content.ContextCompat
 import androidx.lifecycle.ViewModel
-import com.example.safedriveai.data.model.PermissionItemData
-import com.example.safedriveai.data.model.PermissionState
+import com.example.safedriveai.domain.model.PermissionItemData
+import com.example.safedriveai.domain.model.PermissionState
 import com.example.safedriveai.sensors.SensorChecker
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -31,7 +32,7 @@ class PermissionViewModel(private val context: Context) : ViewModel() {
             PermissionItemData(
                 title = "Ubicación",
                 description = "Para el mapa y medir la velocidad de conducción.",
-                icon = androidx.compose.material.icons.Icons.Default.LocationOn,
+                icon = Icons.Default.LocationOn,
                 permissionsToRequest = listOf(
                     Manifest.permission.ACCESS_FINE_LOCATION,
                     Manifest.permission.ACCESS_COARSE_LOCATION
@@ -40,7 +41,7 @@ class PermissionViewModel(private val context: Context) : ViewModel() {
             PermissionItemData(
                 title = "Protocolo SOS",
                 description = "Permite llamar al 112 y enviar SMS en caso de impacto.",
-                icon = androidx.compose.material.icons.Icons.Default.Phone,
+                icon = Icons.Default.Phone,
                 permissionsToRequest = listOf(
                     Manifest.permission.CALL_PHONE,
                     Manifest.permission.SEND_SMS
@@ -49,7 +50,7 @@ class PermissionViewModel(private val context: Context) : ViewModel() {
             PermissionItemData(
                 title = "Micrófono",
                 description = "Para detectar el sonido del impacto.",
-                icon = androidx.compose.material.icons.Icons.Default.Mic,
+                icon = Icons.Default.Mic,
                 permissionsToRequest = listOf(Manifest.permission.RECORD_AUDIO)
             )
         )
@@ -58,7 +59,7 @@ class PermissionViewModel(private val context: Context) : ViewModel() {
             list.add(PermissionItemData(
                 title = "Actividad Física",
                 description = "Para saber cuándo entras y sales del vehículo.",
-                icon = androidx.compose.material.icons.Icons.AutoMirrored.Filled.DirectionsRun,
+                icon = Icons.AutoMirrored.Filled.DirectionsRun,
                 permissionsToRequest = listOf(Manifest.permission.ACTIVITY_RECOGNITION)
             ))
         }
@@ -67,7 +68,7 @@ class PermissionViewModel(private val context: Context) : ViewModel() {
             list.add(PermissionItemData(
                 title = "Notificaciones",
                 description = "Para alertas críticas de seguridad.",
-                icon = androidx.compose.material.icons.Icons.Default.Notifications,
+                icon = Icons.Default.Notifications,
                 permissionsToRequest = listOf(Manifest.permission.POST_NOTIFICATIONS)
             ))
         }

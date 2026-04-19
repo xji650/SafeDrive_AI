@@ -11,7 +11,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
-import com.example.safedriveai.data.model.DashboardModel
+import com.example.safedriveai.domain.model.DashboardModel
 import com.example.safedriveai.ui.dashboard.components.ActivityMonitorCard
 import com.example.safedriveai.ui.dashboard.components.AudioAuraCard
 import com.example.safedriveai.ui.dashboard.components.EmergencyButton

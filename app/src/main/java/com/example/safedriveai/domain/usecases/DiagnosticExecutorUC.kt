@@ -11,7 +11,7 @@ import android.location.LocationManager
 import android.net.ConnectivityManager
 import android.net.NetworkCapabilities
 import androidx.core.content.ContextCompat
-import com.example.safedriveai.data.model.DiagnosticStatus
+import com.example.safedriveai.domain.model.DiagnosticStatus
 import com.example.safedriveai.sensors.SensorChecker
 import kotlinx.coroutines.suspendCancellableCoroutine
 import kotlin.coroutines.resume

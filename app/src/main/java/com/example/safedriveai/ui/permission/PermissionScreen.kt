@@ -1,9 +1,6 @@
 package com.example.safedriveai.ui.permission
 
-import android.content.Context
 import android.content.Intent
-import android.net.ConnectivityManager
-import android.net.NetworkCapabilities
 import android.net.Uri
 import android.provider.Settings
 import androidx.activity.compose.rememberLauncherForActivityResult
@@ -25,7 +22,7 @@ import androidx.compose.ui.unit.dp
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleEventObserver
 import androidx.lifecycle.compose.LocalLifecycleOwner
-import com.example.safedriveai.data.model.PermissionItemData
+import com.example.safedriveai.domain.model.PermissionItemData
 
 
 @Composable

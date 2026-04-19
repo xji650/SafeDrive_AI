@@ -17,8 +17,8 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
-import com.example.safedriveai.data.model.DiagnosticItem
-import com.example.safedriveai.data.model.DiagnosticStatus
+import com.example.safedriveai.domain.model.DiagnosticItem
+import com.example.safedriveai.domain.model.DiagnosticStatus
 
 
 @RequiresApi(Build.VERSION_CODES.O)

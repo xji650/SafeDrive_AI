@@ -1,10 +1,11 @@
 package com.example.safedriveai.ui.dashboard
 
+import android.location.Location
 import android.os.Build
 import androidx.annotation.RequiresApi
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.example.safedriveai.data.model.DashboardModel
+import com.example.safedriveai.domain.model.DashboardModel
 import com.example.safedriveai.data.repository.SensorRepository
 import com.example.safedriveai.sensors.ActivityState
 import kotlinx.coroutines.flow.*
@@ -26,7 +27,7 @@ class DashboardViewModel(private val sensorRepository: SensorRepository) : ViewM
             speed = array[2] as Float,
             amplitude = array[3] as Float,
             currentActivity = array[4] as String,
-            location = array[5] as android.location.Location?
+            location = array[5] as Location?
         )
     }.stateIn(
         scope = viewModelScope,

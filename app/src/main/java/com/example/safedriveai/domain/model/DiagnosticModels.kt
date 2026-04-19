@@ -1,4 +1,4 @@
-package com.example.safedriveai.data.model
+package com.example.safedriveai.domain.model
 
 import androidx.compose.ui.graphics.vector.ImageVector
 

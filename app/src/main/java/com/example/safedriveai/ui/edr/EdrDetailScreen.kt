@@ -31,7 +31,7 @@ import androidx.compose.material.icons.filled.*
 import androidx.compose.material3.*
 import androidx.compose.ui.platform.LocalContext
 import androidx.core.content.FileProvider
-import com.example.safedriveai.data.model.EdrModel
+import com.example.safedriveai.domain.model.EdrModel
 import com.example.safedriveai.ui.edr.components.FeedbackButton
 import com.example.safedriveai.ui.edr.components.TelemetryGraph
 import java.util.Date

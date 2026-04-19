@@ -1,6 +1,7 @@
 package com.example.safedriveai.ui.diagnostic
 
 import android.content.Context
+import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.LocationOn
 import androidx.compose.material.icons.filled.Mic
 import androidx.compose.material.icons.filled.Phone
@@ -9,8 +10,8 @@ import androidx.compose.material.icons.filled.Speed
 import androidx.compose.material.icons.filled.Wifi
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.example.safedriveai.data.model.DiagnosticItem
-import com.example.safedriveai.data.model.DiagnosticStatus
+import com.example.safedriveai.domain.model.DiagnosticItem
+import com.example.safedriveai.domain.model.DiagnosticStatus
 import com.example.safedriveai.domain.usecases.DiagnosticExecutorUC
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -23,12 +24,12 @@ class DiagnosticViewModel : ViewModel() {
     // 1. Mantenemos el estado de la lista
     private val _diagnosticItems = MutableStateFlow(
         listOf(
-            DiagnosticItem("ACCEL", "Acelerómetro", androidx.compose.material.icons.Icons.Default.Speed, "Mide la aceleración y frenado."),
-            DiagnosticItem("GYRO", "Giroscopio", androidx.compose.material.icons.Icons.Default.ScreenRotation, "Detecta las curvas y giros del coche."),
-            DiagnosticItem("GPS", "Antena GPS", androidx.compose.material.icons.Icons.Default.LocationOn, "Precisión de la ubicación en tiempo real."),
-            DiagnosticItem("MIC", "Micrófono", androidx.compose.material.icons.Icons.Default.Mic, "Firma acústica de colisión."),
-            DiagnosticItem("SOS", "Protocolo SOS", androidx.compose.material.icons.Icons.Default.Phone, "Permisos para llamadas y SMS."),
-            DiagnosticItem("NET", "Conectividad", androidx.compose.material.icons.Icons.Default.Wifi, "Conexión para alertas DGT 3.0.")
+            DiagnosticItem("ACCEL", "Acelerómetro", Icons.Default.Speed, "Mide la aceleración y frenado."),
+            DiagnosticItem("GYRO", "Giroscopio", Icons.Default.ScreenRotation, "Detecta las curvas y giros del coche."),
+            DiagnosticItem("GPS", "Antena GPS", Icons.Default.LocationOn, "Precisión de la ubicación en tiempo real."),
+            DiagnosticItem("MIC", "Micrófono", Icons.Default.Mic, "Firma acústica de colisión."),
+            DiagnosticItem("SOS", "Protocolo SOS", Icons.Default.Phone, "Permisos para llamadas y SMS."),
+            DiagnosticItem("NET", "Conectividad", Icons.Default.Wifi, "Conexión para alertas DGT 3.0.")
         )
     )
     val diagnosticItems: StateFlow<List<DiagnosticItem>> = _diagnosticItems.asStateFlow()
