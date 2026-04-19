@@ -3,9 +3,7 @@ package com.example.safedriveai.ui.edr
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.safedriveai.data.local.BlackBoxManager
-import com.example.safedriveai.data.local.entity.IncidentEntity
 import com.example.safedriveai.domain.model.EdrModel
-import com.example.safedriveai.data.local.mapper.toDomainModel
 import com.example.safedriveai.domain.repository.IncidentRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
 import javax.inject.Inject

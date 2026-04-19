@@ -14,5 +14,5 @@ data class IncidentEntity(
     val speedAtImpact: Float, // A qué velocidad iba
     val latitude: Double, // Dónde ocurrió
     val longitude: Double,
-    val isSynced: Boolean = false // Nos dirá si ya lo subimos a Firebase o no
+    val isSynced: Boolean = false
 )

@@ -11,7 +11,6 @@ interface IncidentRepository {
     fun getAllIncidents(): Flow<List<EdrModel>>
 
     suspend fun syncWithCloud()
-    // En la interfaz
     suspend fun getUnsyncedIncidents(): List<EdrModel>
     suspend fun markAsSynced(incidentId: Long)
 }
