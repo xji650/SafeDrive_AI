@@ -17,22 +17,23 @@ import javax.inject.Singleton
 @Module
 @InstallIn(SingletonComponent::class)
 class AppModule {
-    // 1. FIREBASE
-//    @Provides
-//    @Singleton
-//    fun provideFirestore(): FirebaseFirestore {
-//        return FirebaseFirestore.getInstance()
-//    }
+     //1. FIREBASE
+    @Provides
+    @Singleton
+    fun provideFirestore(): FirebaseFirestore {
+        return FirebaseFirestore.getInstance()
+    }
 
     // 2. EL ALMACÉN (Room Database)
     @Provides
     @Singleton
     fun provideDatabase(@ApplicationContext context: Context): AppDatabase {
         return Room.databaseBuilder(
-            context,
-            AppDatabase::class.java,
-            "safedrive_db" // Nombre del archivo de la base de datos en el móvil
-        ).build()
+                context,
+                AppDatabase::class.java,
+                "safedrive_db"
+        ).fallbackToDestructiveMigration(false)
+            .build()
     }
 
     // 3. EL LIBRO DE ÓRDENES (Dao)
@@ -46,11 +47,7 @@ class AppModule {
     @Singleton
     fun provideIncidentRepository(
         dao: IncidentDao,
-//        firestore: FirebaseFirestore
     ): IncidentRepository {
-        // Le decimos a Hilt: "Cuando alguien pida un IncidentRepository (interfaz),
-        // entrégale un IncidentRepositoryImpl (trabajador)".
-//        return IncidentRepositoryImpl(dao, firestore)
         return IncidentRepositoryImpl(dao)
     }
 }

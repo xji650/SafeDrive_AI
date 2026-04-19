@@ -20,11 +20,8 @@ class EdrViewModel @Inject constructor(
 ) : ViewModel() {
 
     // Cada vez que se guarde un choque, esta lista se actualizará SOLA.
+    // Así quedaría tu ViewModel ahora:
     val incidentsHistory: StateFlow<List<EdrModel>> = repository.getAllIncidents()
-        .map { listaEntidades ->
-            // Traducimos cada entidad de la lista a nuestro modelo de pantalla
-            listaEntidades.map { entidad -> entidad.toDomainModel() }
-        }
         .stateIn(
             scope = viewModelScope,
             started = SharingStarted.WhileSubscribed(5000),

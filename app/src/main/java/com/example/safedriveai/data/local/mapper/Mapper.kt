@@ -6,18 +6,11 @@ import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
 
-
 fun IncidentEntity.toDomainModel(): EdrModel {
-
-    // 1. Traducimos el tiempo: De milisegundos (Long) a texto legible (String)
     val sdf = SimpleDateFormat("dd/MM/yyyy HH:mm:ss", Locale.getDefault())
-    val formattedTime = sdf.format(Date(this.timestamp))
-
-    // 2. Construimos el modelo final conectando los cables
-    // 2. Construimos el modelo final conectando los cables
     return EdrModel(
-        time = formattedTime,
-        rawTimestamp = this.timestamp, // <--- ¡AÑADE ESTA LÍNEA AQUÍ!
+        time = sdf.format(Date(this.timestamp)),
+        rawTimestamp = this.timestamp,
         gForce = this.maxGForce,
         speed = this.speedAtImpact,
         audioAmplitude = this.amplitudeMicrophone,
