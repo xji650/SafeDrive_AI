@@ -44,4 +44,47 @@ class IncidentRemoteData @Inject constructor(
             false // Si no hay internet o falla algo
         }
     }
+    // Dentro de IncidentRemoteDataSource.kt
+    suspend fun getAllAccidentsFromCloud(vehicleId: String): List<IncidentEntity> {
+        return try {
+            val snapshot = firestore.collection("vehiculos")
+                .document(vehicleId)
+                .collection("accidentes")
+                .get()
+                .await()
+
+            // CHIVATO 1: Nos dirá cuántos ha encontrado
+            android.util.Log.d("FIREBASE_DEBUG", "¡GET con éxito! Documentos encontrados: ${snapshot.size()}")
+
+            snapshot.toObjects(IncidentEntity::class.java)
+        } catch (e: Exception) {
+            // CHIVATO 2: Si falla el GET, nos dirá por qué
+            android.util.Log.e("FIREBASE_DEBUG", "Fallo al hacer el GET: ${e.message}")
+            emptyList()
+        }
+    }
+
+    // Intenta descargar el JSON pesado de Storage
+    suspend fun downloadTelemetryFile(vehicleId: String, timestamp: Long): File? {
+        return try {
+            val fileName = "EDR_EVENT_${timestamp}.json"
+            val localFile = File(context.filesDir, fileName)
+
+            // Si ya lo tenemos descargado en el móvil, ahorramos internet
+            if (localFile.exists()) return localFile
+
+            // Si no, lo descargamos de Firebase Storage y lo guardamos
+            val storageRef = storage.reference
+                .child("telemetry")
+                .child(vehicleId)
+                .child(fileName)
+
+            // Esto baja el archivo y lo guarda en tu móvil
+            storageRef.getFile(localFile).await()
+            localFile
+        } catch (e: Exception) {
+            e.printStackTrace()
+            null
+        }
+    }
 }

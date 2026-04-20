@@ -4,6 +4,7 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.material.icons.filled.Refresh
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -19,6 +20,7 @@ fun EdrScreen(viewModel: EdrViewModel) {
     val incidents by viewModel.incidentsHistory.collectAsState()
     val selectedFile by viewModel.selectedFile.collectAsState()
     val realData by viewModel.selectedEventData.collectAsState()
+    val isSyncing by viewModel.isSyncing.collectAsState()
 
     // Fondo nativo del sistema
     Box(modifier = Modifier.fillMaxSize().background(MaterialTheme.colorScheme.background)) {
@@ -27,15 +29,43 @@ fun EdrScreen(viewModel: EdrViewModel) {
             // --- VISTA A: LISTA (Estilo Nativo) ---
             Column(modifier = Modifier.padding(16.dp)) {
 
-                Text(
-                    text = "Registros Caja Negra",
-                    style = MaterialTheme.typography.headlineMedium,
-                    fontWeight = FontWeight.Bold,
-                    color = MaterialTheme.colorScheme.primary
-                )
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Column(modifier = Modifier.weight(1f)) {
+                        Text(
+                            text = "Registros Caja Negra",
+                            style = MaterialTheme.typography.headlineMedium,
+                            fontWeight = FontWeight.Bold,
+                            color = MaterialTheme.colorScheme.primary
+                        )
+                    }
+
+                    // EL BOTÓN DE SINCRONIZACIÓN
+                    IconButton(
+                        onClick = { viewModel.syncHistoryWithCloud() },
+                        modifier = Modifier.size(48.dp)
+                    ) {
+                        if (isSyncing) {
+                            CircularProgressIndicator(
+                                modifier = Modifier.size(24.dp),
+                                strokeWidth = 2.dp
+                            )
+                        } else {
+                            // IMPORTANTE: Importa androidx.compose.material.icons.filled.Refresh
+                            Icon(
+                                imageVector = androidx.compose.material.icons.Icons.Default.Refresh,
+                                contentDescription = "Sincronizar nube",
+                                tint = MaterialTheme.colorScheme.primary
+                            )
+                        }
+                    }
+                }
 
                 Text(
-                    text = "Historial de telemetría e incidentes detectados.",
+                    text = "Historial de telemetría e incidentes.",
                     style = MaterialTheme.typography.bodyLarge,
                     color = MaterialTheme.colorScheme.onSurfaceVariant
                 )

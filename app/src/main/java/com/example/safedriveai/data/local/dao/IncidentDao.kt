@@ -24,5 +24,5 @@ interface IncidentDao {
 
     // 4. Marcar un accidente como "Subido a la nube"
     @Query("UPDATE incidents_table SET isSynced = 1 WHERE id = :incidentId")
-    suspend fun markAsSynced(incidentId: Int)
+    suspend fun markAsSynced(incidentId: String)
 }

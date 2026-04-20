@@ -47,6 +47,22 @@ class IncidentRepositoryImpl @Inject constructor(
         }
     }
 
+    override suspend fun fetchHistoryFromCloud() {
+        val dummyVehicleId = "vehiculo_prueba_01"
+        val cloudIncidents = remoteDataSource.getAllAccidentsFromCloud(dummyVehicleId)
+
+        for (cloudEntity in cloudIncidents) {
+
+            val entityToSave = cloudEntity.copy(isSynced = true)
+            dao.insertIncident(entityToSave)
+        }
+    }
+
+    override suspend fun getTelemetryFile(timestamp: Long): java.io.File? {
+        val dummyVehicleId = "vehiculo_prueba_01"
+        return remoteDataSource.downloadTelemetryFile(dummyVehicleId, timestamp)
+    }
+
     override fun getAllIncidents(): Flow<List<EdrModel>> =
         dao.getAllIncidents().map { entities -> entities.map { it.toDomainModel() } }
 
@@ -54,5 +70,5 @@ class IncidentRepositoryImpl @Inject constructor(
         dao.getUnsyncedIncidents().map { it.toDomainModel() }
 
     override suspend fun markAsSynced(incidentId: Long) =
-        dao.markAsSynced(incidentId.toInt())
+        dao.markAsSynced(incidentId.toString())
 }
