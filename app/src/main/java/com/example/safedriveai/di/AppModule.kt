@@ -7,6 +7,7 @@ import android.content.Context
 import androidx.room.Room
 import com.example.safedriveai.data.local.AppDatabase
 import com.example.safedriveai.data.local.dao.IncidentDao
+import com.example.safedriveai.data.remote.IncidentRemoteData
 import com.example.safedriveai.data.repository.IncidentRepositoryImpl
 import com.example.safedriveai.domain.repository.IncidentRepository
 import com.google.firebase.firestore.FirebaseFirestore
@@ -54,11 +55,8 @@ class AppModule {
     @Singleton
     fun provideIncidentRepository(
         dao: IncidentDao,
-        firestore: FirebaseFirestore,
-        storage: FirebaseStorage,
-        @ApplicationContext context: Context // <-- 1. PEDIMOS EL CONTEXTO A HILT
+        remoteDataSource: IncidentRemoteData // <-- Le pasamos el nuevo trabajador
     ): IncidentRepository {
-        // 2. SE LO ENTREGAMOS AL REPOSITORIO (LOS 4 PARÁMETROS)
-        return IncidentRepositoryImpl(dao, firestore, storage, context)
+        return IncidentRepositoryImpl(dao, remoteDataSource)
     }
 }

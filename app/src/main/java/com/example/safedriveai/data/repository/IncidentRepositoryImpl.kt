@@ -1,26 +1,18 @@
 package com.example.safedriveai.data.repository
 
-import android.content.Context
 import com.example.safedriveai.data.local.dao.IncidentDao
 import com.example.safedriveai.data.local.entity.IncidentEntity
 import com.example.safedriveai.data.local.mapper.toDomainModel
+import com.example.safedriveai.data.remote.IncidentRemoteData
 import com.example.safedriveai.domain.model.EdrModel
 import com.example.safedriveai.domain.repository.IncidentRepository
-import com.google.firebase.firestore.FirebaseFirestore
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
-import kotlinx.coroutines.tasks.await
-import java.io.File
 import javax.inject.Inject
-import android.net.Uri
-import com.google.firebase.storage.FirebaseStorage
-import dagger.hilt.android.qualifiers.ApplicationContext
 
 class IncidentRepositoryImpl @Inject constructor(
     private val dao: IncidentDao,
-    private val firestore: FirebaseFirestore,
-    private val storage: FirebaseStorage,
-    @ApplicationContext private val context: Context
+    private val remoteDataSource: IncidentRemoteData
 ) : IncidentRepository {
 
     override suspend fun saveIncident(incident: EdrModel) {
@@ -36,45 +28,22 @@ class IncidentRepositoryImpl @Inject constructor(
         // 1. Guardamos localmente (Room)
         dao.insertIncident(entity)
 
-        // 2. INTENTO DE SUBIDA INMEDIATO (Temporal para pruebas)
+        // 2. Intentamos sincronizar
         syncWithCloud()
     }
 
     override suspend fun syncWithCloud() {
-        try {
-            val unsynced = dao.getUnsyncedIncidents()
-            val dummyVehicleId = "vehiculo_prueba_01"
+        val unsynced = dao.getUnsyncedIncidents()
+        val dummyVehicleId = "vehiculo_prueba_01"
 
-            for (entity in unsynced) {
-                // --- PARTE 1: SUBIR EL ARCHIVO JSON A FIREBASE STORAGE ---
-                val fileName = "EDR_EVENT_${entity.timestamp}.json"
-                val file = File(context.filesDir, fileName)
+        for (entity in unsynced) {
+            // El Repositorio le delega el trabajo duro al RemoteDataSource
+            val success = remoteDataSource.uploadIncidentAndTelemetry(entity, dummyVehicleId)
 
-                if (file.exists()) {
-                    // Ruta en Storage: telemetry/vehiculo_prueba_01/EDR_EVENT_1713532...json
-                    val storageRef = storage.reference
-                        .child("telemetry")
-                        .child(dummyVehicleId)
-                        .child(fileName)
-
-                    // Subimos el archivo
-                    storageRef.putFile(Uri.fromFile(file)).await()
-                }
-
-                // --- PARTE 2: SUBIR EL RESUMEN A FIRESTORE ---
-                // Ruta en Firestore: vehiculos -> vehiculo_prueba_01 -> accidentes -> 1713532...
-                firestore.collection("vehiculos")
-                    .document(dummyVehicleId)
-                    .collection("accidentes")
-                    .document(entity.timestamp.toString())
-                    .set(entity)
-                    .await()
-
-                // --- PARTE 3: MARCAR COMO SINCRONIZADO EN ROOM ---
+            // Si el trabajador de la nube confirma el éxito, el Repositorio actualiza Room
+            if (success) {
                 dao.markAsSynced(entity.id)
             }
-        } catch (e: Exception) {
-            e.printStackTrace()
         }
     }
 
