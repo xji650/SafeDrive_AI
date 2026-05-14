@@ -8,8 +8,13 @@ import androidx.core.view.WindowInsetsCompat
 import androidx.core.view.WindowInsetsControllerCompat
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Build
 import androidx.compose.material.icons.filled.Home
@@ -21,6 +26,9 @@ import androidx.compose.material3.NavigationBar
 import androidx.compose.material3.NavigationBarItem
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
+import androidx.compose.material3.Card
+import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.ListItem
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -31,6 +39,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.slideInVertically
 import androidx.compose.animation.slideOutVertically
@@ -38,6 +47,9 @@ import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.runtime.*
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.material.icons.filled.Report
+import androidx.compose.material.icons.filled.Delete
+import androidx.compose.material.icons.filled.ChevronRight
+import androidx.compose.foundation.clickable
 import androidx.compose.ui.platform.LocalContext
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
@@ -45,6 +57,8 @@ import androidx.navigation.compose.rememberNavController
 import com.example.safedriveai.ui.dashboard.DashboardScreen
 import com.example.safedriveai.utils.RotationAwareContent
 import com.example.safedriveai.utils.rememberDeviceRotation
+import com.example.safedriveai.ui.preferences.PreferencesScreen
+import com.example.safedriveai.ui.preferences.PreferencesViewModel
 import com.example.safedriveai.ui.edr.EdrScreen
 import com.example.safedriveai.ui.edr.EdrViewModel
 import com.example.safedriveai.domain.model.AppDestinations
@@ -105,7 +119,8 @@ fun SafeDriveAIApp(navController: NavController) {
             ) {
                 NavigationBar {
                     navItems.forEach { item ->
-                        val isSelected = selectedScreen == item.destination
+                        val isSelected = selectedScreen == item.destination || 
+                                        (item.destination == AppDestinations.USER_PREFERENCE && selectedScreen == AppDestinations.TRASH)
 
                         NavigationBarItem(
                             selected = isSelected,
@@ -159,23 +174,16 @@ fun SafeDriveAIApp(navController: NavController) {
                 )
                 AppDestinations.DIAGNOSTIC -> DiagnosticScreen(viewModel = diagnosticViewModel)
                 AppDestinations.EDR -> EdrScreen(viewModel = edrViewModel)
-                AppDestinations.USER_PREFERENCE -> UserPreferenceScreen()
+                AppDestinations.USER_PREFERENCE -> {
+                    val preferencesViewModel: PreferencesViewModel = hiltViewModel()
+                    PreferencesScreen(viewModel = preferencesViewModel)
+                }
+                AppDestinations.TRASH -> EdrScreen(
+                    viewModel = edrViewModel, 
+                    initiallyInTrashMode = true
+                )
             }
         }
-    }
-}
-
-@RequiresApi(Build.VERSION_CODES.O)
-@Composable
-fun UserPreferenceScreen() {
-    Column(
-        modifier = Modifier
-            .fillMaxSize()
-            .padding(16.dp),
-        verticalArrangement = Arrangement.Center,
-        horizontalAlignment = Alignment.Start
-    ) {
-        Text(text = "User Preferences", style = MaterialTheme.typography.titleLarge)
     }
 }
 

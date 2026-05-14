@@ -3,7 +3,7 @@ package com.example.safedriveai.domain.model
 import androidx.compose.ui.graphics.vector.ImageVector
 
 enum class AppDestinations {
-    DASHBOARD, DIAGNOSTIC, EDR, USER_PREFERENCE
+    DASHBOARD, DIAGNOSTIC, EDR, USER_PREFERENCE, TRASH
 }
 
 data class NavigationItem(

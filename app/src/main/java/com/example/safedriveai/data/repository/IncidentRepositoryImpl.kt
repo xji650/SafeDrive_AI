@@ -47,7 +47,22 @@ class IncidentRepositoryImpl @Inject constructor(
     override suspend fun fetchHistoryFromCloud() {
         val dummyVehicleId = "vehiculo_prueba_01"
         val cloudIncidents = remoteDataSource.getAllAccidentsFromCloud(dummyVehicleId)
+
+        // 1. Obtenemos información local para decidir si sobrescribir o no
+        val unsyncedLocalIds = dao.getUnsyncedIncidents().map { it.id }.toSet()
+        val locallyDeletedIds = dao.getDeletedIncidentsDirect().map { it.id }.toSet()
+
         for (cloudEntity in cloudIncidents) {
+            // Regla 1: Si hay cambios locales sin subir (como un borrado reciente), NO tocar.
+            if (unsyncedLocalIds.contains(cloudEntity.id)) continue
+
+            // Regla 2: Si ya está borrado localmente y la nube dice que NO, respetamos el borrado local.
+            // Esto evita que eventos borrados "resuciten" por desincronización de la nube.
+            if (locallyDeletedIds.contains(cloudEntity.id) && !cloudEntity.isDeleted) {
+                continue
+            }
+
+            // 2. Guardamos el estado de la nube (que puede ser isDeleted = true si ya se sincronizó el borrado)
             val entityToSave = cloudEntity.copy(isSynced = true)
             dao.insertIncident(entityToSave)
         }
@@ -69,22 +84,55 @@ class IncidentRepositoryImpl @Inject constructor(
     }
 
     /**
-     * Borrado completo (CRUD):
-     * Borra el registro de Room y el archivo físico del disco.
+     * Borrado suave (RGPD):
+     * Oculta el registro de la vista del usuario y marca el inicio del periodo de 30 días.
      */
     override suspend fun deleteIncident(incidentId: String) {
-        // Obtenemos el registro antes de borrarlo para saber su timestamp
-        dao.getAllIncidentsDirect().find { it.id == incidentId }?.let { entity ->
-            blackBoxManager.deleteEventFile(entity.timestamp)
-        }
-        dao.deleteIncident(incidentId)
+        val currentTime = System.currentTimeMillis()
+        dao.softDeleteIncident(incidentId, currentTime)
+        syncWithCloud()
+    }
+
+    override suspend fun restoreIncident(incidentId: String) {
+        dao.restoreIncident(incidentId)
+        syncWithCloud()
+    }
+
+    override suspend fun restoreAllIncidents() {
+        dao.restoreAllIncidents()
+        syncWithCloud()
     }
 
     override suspend fun deleteAllIncidents() {
-        // Borramos todos los archivos físicos primero
-        dao.getAllIncidentsDirect().forEach { entity ->
+        val currentTime = System.currentTimeMillis()
+        dao.softDeleteAllIncidents(currentTime)
+        syncWithCloud()
+    }
+
+    override fun getDeletedIncidents(): Flow<List<EdrModel>> =
+        dao.getDeletedIncidents().map { entities -> entities.map { it.toDomainModel() } }
+
+    /**
+     * Purga definitiva (Mantenimiento):
+     * Borra FÍSICAMENTE los datos que llevan más de 30 días en la "papelera".
+     */
+    override suspend fun purgeDeletedData() {
+        val thirtyDaysInMillis = 30L * 24 * 60 * 60 * 1000
+        val threshold = System.currentTimeMillis() - thirtyDaysInMillis
+        val dummyVehicleId = "vehiculo_prueba_01"
+
+        // 1. Obtenemos los registros que ya han expirado para limpiar sus archivos
+        val allRecords = dao.getAllIncidentsDirect()
+        val toHardDelete = allRecords.filter { it.isDeleted && (it.deletedAt ?: 0) < threshold }
+
+        toHardDelete.forEach { entity ->
+            // Borrado físico del archivo JSON local
             blackBoxManager.deleteEventFile(entity.timestamp)
+            // Borrado físico en la nube (Firestore + Storage)
+            remoteDataSource.deleteIncidentFromCloud(entity.timestamp, dummyVehicleId)
         }
-        dao.deleteAllIncidents()
+
+        // 2. Limpieza definitiva en la base de datos Room
+        dao.purgeOldDeletedIncidents(threshold)
     }
 }

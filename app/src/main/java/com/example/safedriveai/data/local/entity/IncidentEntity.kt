@@ -15,5 +15,9 @@ data class IncidentEntity(
     val speedAtImpact: Float = 0f,
     val latitude: Double = 0.0,
     val longitude: Double = 0.0,
-    val isSynced: Boolean = false
+    val isSynced: Boolean = false,
+    
+    // Campos para Borrado Suave (GDPR Compliance)
+    val isDeleted: Boolean = false,
+    val deletedAt: Long? = null
 )

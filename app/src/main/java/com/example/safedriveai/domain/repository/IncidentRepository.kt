@@ -14,7 +14,11 @@ interface IncidentRepository {
     suspend fun getUnsyncedIncidents(): List<EdrModel>
     suspend fun markAsSynced(incidentId: String)
 
-    // Nuevos métodos para completar el CRUD (Delete)
+    // Nuevos métodos para completar el CRUD con cumplimiento RGPD (Soft Delete)
     suspend fun deleteIncident(incidentId: String)
+    suspend fun restoreIncident(incidentId: String)
+    suspend fun restoreAllIncidents()
     suspend fun deleteAllIncidents()
+    suspend fun purgeDeletedData()
+    fun getDeletedIncidents(): Flow<List<EdrModel>>
 }

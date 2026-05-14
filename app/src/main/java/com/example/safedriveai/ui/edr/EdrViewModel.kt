@@ -17,9 +17,23 @@ class EdrViewModel @Inject constructor(
     private val blackBoxManager: BlackBoxManager
 ) : ViewModel() {
 
+    init {
+        // Mantenimiento RGPD: Limpiar registros de >30 días al abrir la sección
+        viewModelScope.launch {
+            repository.purgeDeletedData()
+        }
+    }
+
     // Cada vez que se guarde un choque, esta lista se actualizará SOLA.
     // Así quedaría tu ViewModel ahora:
     val incidentsHistory: StateFlow<List<EdrModel>> = repository.getAllIncidents()
+        .stateIn(
+            scope = viewModelScope,
+            started = SharingStarted.WhileSubscribed(5000),
+            initialValue = emptyList()
+        )
+
+    val deletedIncidents: StateFlow<List<EdrModel>> = repository.getDeletedIncidents()
         .stateIn(
             scope = viewModelScope,
             started = SharingStarted.WhileSubscribed(5000),
@@ -68,11 +82,11 @@ class EdrViewModel @Inject constructor(
         viewModelScope.launch {
             _isSyncing.value = true // Encendemos la ruedita de carga
 
-            // 1. Descargamos lo nuevo de Firebase a Room
-            repository.fetchHistoryFromCloud()
-
-            // 2. Por si acaso, intentamos subir lo que se haya quedado offline
+            // 1. Primero subimos lo local (incluyendo marcas de borrado suave)
             repository.syncWithCloud()
+
+            // 2. Luego descargamos lo nuevo de Firebase
+            repository.fetchHistoryFromCloud()
 
             _isSyncing.value = false // Apagamos la ruedita de carga
         }
@@ -87,6 +101,18 @@ class EdrViewModel @Inject constructor(
     fun clearHistory() {
         viewModelScope.launch {
             repository.deleteAllIncidents()
+        }
+    }
+
+    fun restoreIncident(incidentId: String) {
+        viewModelScope.launch {
+            repository.restoreIncident(incidentId)
+        }
+    }
+
+    fun restoreAllIncidents() {
+        viewModelScope.launch {
+            repository.restoreAllIncidents()
         }
     }
 }

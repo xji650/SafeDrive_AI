@@ -87,4 +87,33 @@ class IncidentRemoteData @Inject constructor(
             null
         }
     }
+
+    /**
+     * Elimina el registro de Firestore y el archivo JSON de Storage.
+     */
+    suspend fun deleteIncidentFromCloud(timestamp: Long, vehicleId: String): Boolean {
+        return try {
+            // 1. Borrar de Firestore
+            firestore.collection("vehiculos")
+                .document(vehicleId)
+                .collection("accidentes")
+                .document(timestamp.toString())
+                .delete()
+                .await()
+
+            // 2. Borrar de Storage
+            val fileName = "EDR_EVENT_$timestamp.json"
+            storage.reference
+                .child("telemetry")
+                .child(vehicleId)
+                .child(fileName)
+                .delete()
+                .await()
+
+            true
+        } catch (e: Exception) {
+            e.printStackTrace()
+            false
+        }
+    }
 }
