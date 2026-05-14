@@ -77,4 +77,16 @@ class EdrViewModel @Inject constructor(
             _isSyncing.value = false // Apagamos la ruedita de carga
         }
     }
+
+    fun deleteIncident(incidentId: String) {
+        viewModelScope.launch {
+            repository.deleteIncident(incidentId)
+        }
+    }
+
+    fun clearHistory() {
+        viewModelScope.launch {
+            repository.deleteAllIncidents()
+        }
+    }
 }

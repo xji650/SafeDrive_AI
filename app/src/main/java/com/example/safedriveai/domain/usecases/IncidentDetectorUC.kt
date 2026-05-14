@@ -50,6 +50,7 @@ class IncidentDetectorUC @Inject constructor (
         scope.launch {
 
             val incident = EdrModel(
+                id = java.util.UUID.randomUUID().toString(),
                 time = LocalDateTime.now().toString(), // Fecha para humanos
                 rawTimestamp = time,        // La llave maestra para el JSON
                 gForce = g,

@@ -4,6 +4,8 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.DeleteSweep
 import androidx.compose.material.icons.filled.Refresh
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
@@ -16,102 +18,114 @@ import kotlin.collections.maxByOrNull
 
 @Composable
 fun EdrScreen(viewModel: EdrViewModel) {
-    // 1. La Vista "escucha" los estados del ViewModel
     val incidents by viewModel.incidentsHistory.collectAsState()
     val selectedFile by viewModel.selectedFile.collectAsState()
     val realData by viewModel.selectedEventData.collectAsState()
     val isSyncing by viewModel.isSyncing.collectAsState()
 
-    // Fondo nativo del sistema
+    var showDeleteAllDialog by remember { mutableStateOf(false) }
+    var incidentToDelete by remember { mutableStateOf<String?>(null) }
+
+    if (showDeleteAllDialog) {
+        AlertDialog(
+            onDismissRequest = { showDeleteAllDialog = false },
+            title = { Text("¿Borrar historial?") },
+            text = { Text("Esta acción eliminará todos los registros y archivos de telemetría de forma permanente.") },
+            confirmButton = {
+                TextButton(onClick = {
+                    viewModel.clearHistory()
+                    showDeleteAllDialog = false
+                }) {
+                    Text("BORRAR TODO", color = MaterialTheme.colorScheme.error)
+                }
+            },
+            dismissButton = {
+                TextButton(onClick = { showDeleteAllDialog = false }) {
+                    Text("CANCELAR")
+                }
+            }
+        )
+    }
+
+    if (incidentToDelete != null) {
+        AlertDialog(
+            onDismissRequest = { incidentToDelete = null },
+            title = { Text("¿Borrar registro?") },
+            text = { Text("Se eliminará el registro seleccionado y su archivo asociado.") },
+            confirmButton = {
+                TextButton(onClick = {
+                    incidentToDelete?.let { viewModel.deleteIncident(it) }
+                    incidentToDelete = null
+                }) {
+                    Text("BORRAR", color = MaterialTheme.colorScheme.error)
+                }
+            },
+            dismissButton = {
+                TextButton(onClick = { incidentToDelete = null }) {
+                    Text("CANCELAR")
+                }
+            }
+        )
+    }
+
     Box(modifier = Modifier.fillMaxSize().background(MaterialTheme.colorScheme.background)) {
-
         if (selectedFile == null) {
-            // --- VISTA A: LISTA (Estilo Nativo) ---
             Column(modifier = Modifier.padding(16.dp)) {
-
                 Row(
                     modifier = Modifier.fillMaxWidth(),
                     horizontalArrangement = Arrangement.SpaceBetween,
                     verticalAlignment = Alignment.CenterVertically
                 ) {
-                    Column(modifier = Modifier.weight(1f)) {
-                        Text(
-                            text = "Registros Caja Negra",
-                            style = MaterialTheme.typography.headlineMedium,
-                            fontWeight = FontWeight.Bold,
-                            color = MaterialTheme.colorScheme.primary
-                        )
-                    }
+                    Text(
+                        text = "Caja Negra",
+                        style = MaterialTheme.typography.headlineMedium,
+                        fontWeight = FontWeight.Bold,
+                        color = MaterialTheme.colorScheme.primary
+                    )
 
-                    // EL BOTÓN DE SINCRONIZACIÓN
-                    IconButton(
-                        onClick = { viewModel.syncHistoryWithCloud() },
-                        modifier = Modifier.size(48.dp)
-                    ) {
-                        if (isSyncing) {
-                            CircularProgressIndicator(
-                                modifier = Modifier.size(24.dp),
-                                strokeWidth = 2.dp
-                            )
-                        } else {
-                            // IMPORTANTE: Importa androidx.compose.material.icons.filled.Refresh
-                            Icon(
-                                imageVector = androidx.compose.material.icons.Icons.Default.Refresh,
-                                contentDescription = "Sincronizar nube",
-                                tint = MaterialTheme.colorScheme.primary
-                            )
+                    Row {
+                        IconButton(onClick = { viewModel.syncHistoryWithCloud() }) {
+                            if (isSyncing) {
+                                CircularProgressIndicator(modifier = Modifier.size(24.dp), strokeWidth = 2.dp)
+                            } else {
+                                Icon(Icons.Default.Refresh, "Sincronizar", tint = MaterialTheme.colorScheme.primary)
+                            }
+                        }
+                        IconButton(onClick = { showDeleteAllDialog = true }) {
+                            Icon(Icons.Default.DeleteSweep, "Borrar todo", tint = MaterialTheme.colorScheme.error)
                         }
                     }
                 }
 
-                Text(
-                    text = "Historial de telemetría e incidentes.",
-                    style = MaterialTheme.typography.bodyLarge,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant
-                )
-
-                Spacer(modifier = Modifier.height(24.dp))
+                Spacer(modifier = Modifier.height(16.dp))
 
                 if (incidents.isEmpty()) {
                     Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-                        Text(
-                            text = "No hay registros disponibles.",
-                            style = MaterialTheme.typography.bodyLarge,
-                            color = MaterialTheme.colorScheme.onSurfaceVariant
-                        )
+                        Text("No hay registros", color = MaterialTheme.colorScheme.onSurfaceVariant)
                     }
                 } else {
                     LazyColumn(
                         modifier = Modifier.fillMaxSize(),
-                        verticalArrangement = Arrangement.spacedBy(12.dp),
-                        contentPadding = PaddingValues(bottom = 16.dp)
+                        verticalArrangement = Arrangement.spacedBy(12.dp)
                     ) {
                         items(incidents) { incident ->
                             IncidentRoomCard(
                                 incident = incident,
-                                onOpen = { viewModel.openDetailsFromEntity(incident) }
+                                onOpen = { viewModel.openDetailsFromEntity(incident) },
+                                onDelete = { incidentToDelete = incident.id }
                             )
                         }
                     }
                 }
             }
         } else {
-            // --- VISTA B: DETALLE FORENSE REAL ---
-            // Solo dibujamos la vista si los datos ya han sido cargados por el ViewModel
             realData?.let { data ->
-                val maxG = data.maxByOrNull { it.gForce }?.gForce ?: 0f
-
                 EdrDetailScreen(
                     data = data,
                     file = selectedFile!!,
-                    maxG = maxG,
+                    maxG = data.maxByOrNull { it.gForce }?.gForce ?: 0f,
                     onBack = { viewModel.closeDetails() }
                 )
-            } ?: run {
-                // Muestra un estado de carga mientras el ViewModel lee el JSON
-                Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-                    CircularProgressIndicator()
-                }
             }
         }
     }

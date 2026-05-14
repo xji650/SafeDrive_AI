@@ -1,5 +1,6 @@
 package com.example.safedriveai.data.repository
 
+import com.example.safedriveai.data.local.BlackBoxManager
 import com.example.safedriveai.data.local.dao.IncidentDao
 import com.example.safedriveai.data.local.entity.IncidentEntity
 import com.example.safedriveai.data.local.mapper.toDomainModel
@@ -12,11 +13,13 @@ import javax.inject.Inject
 
 class IncidentRepositoryImpl @Inject constructor(
     private val dao: IncidentDao,
-    private val remoteDataSource: IncidentRemoteData
+    private val remoteDataSource: IncidentRemoteData,
+    private val blackBoxManager: BlackBoxManager
 ) : IncidentRepository {
 
     override suspend fun saveIncident(incident: EdrModel) {
         val entity = IncidentEntity(
+            id = incident.id,
             timestamp = incident.rawTimestamp,
             amplitudeMicrophone = incident.audioAmplitude,
             maxGForce = incident.gForce,
@@ -25,10 +28,7 @@ class IncidentRepositoryImpl @Inject constructor(
             longitude = incident.longitude,
             isSynced = incident.isSynced
         )
-        // 1. Guardamos localmente (Room)
         dao.insertIncident(entity)
-
-        // 2. Intentamos sincronizar
         syncWithCloud()
     }
 
@@ -37,10 +37,7 @@ class IncidentRepositoryImpl @Inject constructor(
         val dummyVehicleId = "vehiculo_prueba_01"
 
         for (entity in unsynced) {
-            // El Repositorio le delega el trabajo duro al RemoteDataSource
             val success = remoteDataSource.uploadIncidentAndTelemetry(entity, dummyVehicleId)
-
-            // Si el trabajador de la nube confirma el éxito, el Repositorio actualiza Room
             if (success) {
                 dao.markAsSynced(entity.id)
             }
@@ -50,9 +47,7 @@ class IncidentRepositoryImpl @Inject constructor(
     override suspend fun fetchHistoryFromCloud() {
         val dummyVehicleId = "vehiculo_prueba_01"
         val cloudIncidents = remoteDataSource.getAllAccidentsFromCloud(dummyVehicleId)
-
         for (cloudEntity in cloudIncidents) {
-
             val entityToSave = cloudEntity.copy(isSynced = true)
             dao.insertIncident(entityToSave)
         }
@@ -69,6 +64,27 @@ class IncidentRepositoryImpl @Inject constructor(
     override suspend fun getUnsyncedIncidents(): List<EdrModel> =
         dao.getUnsyncedIncidents().map { it.toDomainModel() }
 
-    override suspend fun markAsSynced(incidentId: Long) =
-        dao.markAsSynced(incidentId.toString())
+    override suspend fun markAsSynced(incidentId: String) {
+        dao.markAsSynced(incidentId)
+    }
+
+    /**
+     * Borrado completo (CRUD):
+     * Borra el registro de Room y el archivo físico del disco.
+     */
+    override suspend fun deleteIncident(incidentId: String) {
+        // Obtenemos el registro antes de borrarlo para saber su timestamp
+        dao.getAllIncidentsDirect().find { it.id == incidentId }?.let { entity ->
+            blackBoxManager.deleteEventFile(entity.timestamp)
+        }
+        dao.deleteIncident(incidentId)
+    }
+
+    override suspend fun deleteAllIncidents() {
+        // Borramos todos los archivos físicos primero
+        dao.getAllIncidentsDirect().forEach { entity ->
+            blackBoxManager.deleteEventFile(entity.timestamp)
+        }
+        dao.deleteAllIncidents()
+    }
 }

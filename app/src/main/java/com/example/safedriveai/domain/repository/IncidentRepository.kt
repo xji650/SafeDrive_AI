@@ -12,5 +12,9 @@ interface IncidentRepository {
     suspend fun syncWithCloud()
     suspend fun getTelemetryFile(timestamp: Long): java.io.File?
     suspend fun getUnsyncedIncidents(): List<EdrModel>
-    suspend fun markAsSynced(incidentId: Long)
+    suspend fun markAsSynced(incidentId: String)
+
+    // Nuevos métodos para completar el CRUD (Delete)
+    suspend fun deleteIncident(incidentId: String)
+    suspend fun deleteAllIncidents()
 }

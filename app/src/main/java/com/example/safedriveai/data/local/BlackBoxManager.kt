@@ -11,41 +11,52 @@ import dagger.hilt.android.qualifiers.ApplicationContext
 import javax.inject.Inject
 import java.io.File
 import java.time.LocalDateTime
+import java.util.UUID
 
 class BlackBoxManager @Inject constructor (
     @ApplicationContext private val context: Context
 ) {
-    // 30 segundos de datos a 10 registros por segundo = 300 puntos
     private val buffer = mutableListOf<EdrModel>()
     private val MAX_SAMPLES = 300
+
     @RequiresApi(Build.VERSION_CODES.O)
-    fun addPoint(g: Float, s: Float, a: Float, lat: Double, lon: Double) { // <-- 1. PIDE LAS COORDENADAS AQUÍ
+    fun addPoint(g: Float, s: Float, a: Float, lat: Double, lon: Double) {
         if (buffer.size >= MAX_SAMPLES) buffer.removeAt(0)
 
         val currentMillis = System.currentTimeMillis()
 
         buffer.add(
             EdrModel(
+                id = UUID.randomUUID().toString(),
                 time = LocalDateTime.now().toString(),
-                rawTimestamp = currentMillis, // <-- El número largo para buscar archivos
+                rawTimestamp = currentMillis,
                 gForce = g,
                 speed = s,
                 audioAmplitude = a,
-                latitude = lat,       // <-- La que recibimos arriba
-                longitude = lon,      // <-- La que recibimos arriba
-                isSynced = false      // <-- Por defecto false porque aún no ha subido a Firebase
+                latitude = lat,
+                longitude = lon,
+                isSynced = false
             )
         )
     }
 
-    fun saveEventToDisk(timestamp: Long) {
-        val fileName = "EDR_EVENT_${timestamp}.json" // <-- USA EL PARÁMETRO
+    /**
+     * Elimina el archivo físico de telemetría del disco.
+     */
+    fun deleteEventFile(timestamp: Long) {
+        val fileName = "EDR_EVENT_${timestamp}.json"
         val file = File(context.filesDir, fileName)
+        if (file.exists()) {
+            file.delete()
+            Log.d("EDR", "Archivo físico eliminado: ${file.absolutePath}")
+        }
+    }
 
-        // Usamos Gson para convertir la lista en un JSON estructurado
+    fun saveEventToDisk(timestamp: Long) {
+        val fileName = "EDR_EVENT_${timestamp}.json"
+        val file = File(context.filesDir, fileName)
         val jsonString = Gson().toJson(buffer)
         file.writeText(jsonString)
-
         Log.d("EDR", "Caja Negra guardada: ${file.absolutePath}")
     }
 
@@ -58,7 +69,6 @@ class BlackBoxManager @Inject constructor (
     fun loadEventFromDisk(file: File): List<EdrModel> {
         return try {
             val jsonString = file.readText()
-            // Le decimos a Gson qué tipo de lista estamos esperando
             val type = object : TypeToken<List<EdrModel>>() {}.type
             Gson().fromJson(jsonString, type)
         } catch (e: Exception) {

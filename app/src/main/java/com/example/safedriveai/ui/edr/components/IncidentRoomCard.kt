@@ -8,6 +8,7 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.CloudDone
 import androidx.compose.material.icons.filled.CloudOff
+import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.Warning
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
@@ -17,13 +18,14 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.example.safedriveai.domain.model.EdrModel // <-- CAMBIO IMPORTANTE AQUÍ
+import com.example.safedriveai.domain.model.EdrModel
 
 @SuppressLint("DefaultLocale")
 @Composable
 fun IncidentRoomCard(
     incident: EdrModel,
-    onOpen: () -> Unit
+    onOpen: () -> Unit,
+    onDelete: () -> Unit
 ) {
     Card(
         modifier = Modifier.fillMaxWidth().clickable { onOpen() },
@@ -33,7 +35,7 @@ fun IncidentRoomCard(
     ) {
         Column(modifier = Modifier.padding(16.dp)) {
             Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween, verticalAlignment = Alignment.CenterVertically) {
-                // Indicador de sincronización con Firebase (Funciona igual)
+                // Indicador de sincronización
                 Row(verticalAlignment = Alignment.CenterVertically) {
                     Icon(
                         imageVector = if (incident.isSynced) Icons.Default.CloudDone else Icons.Default.CloudOff,
@@ -49,7 +51,18 @@ fun IncidentRoomCard(
                     )
                 }
 
-                Text("Impacto detectado", color = MaterialTheme.colorScheme.error, fontSize = 10.sp, fontWeight = FontWeight.Bold)
+                // BOTÓN DE BORRAR INDIVIDUAL
+                IconButton(
+                    onClick = onDelete,
+                    modifier = Modifier.size(24.dp)
+                ) {
+                    Icon(
+                        imageVector = Icons.Default.Delete,
+                        contentDescription = "Borrar incidente",
+                        tint = MaterialTheme.colorScheme.error.copy(alpha = 0.7f),
+                        modifier = Modifier.size(18.dp)
+                    )
+                }
             }
 
             Spacer(Modifier.height(8.dp))

@@ -6,6 +6,7 @@ import dagger.hilt.components.SingletonComponent
 import android.content.Context
 import androidx.room.Room
 import com.example.safedriveai.data.local.AppDatabase
+import com.example.safedriveai.data.local.BlackBoxManager
 import com.example.safedriveai.data.local.dao.IncidentDao
 import com.example.safedriveai.data.remote.IncidentRemoteData
 import com.example.safedriveai.data.repository.IncidentRepositoryImpl
@@ -55,8 +56,9 @@ class AppModule {
     @Singleton
     fun provideIncidentRepository(
         dao: IncidentDao,
-        remoteDataSource: IncidentRemoteData // <-- Le pasamos el nuevo trabajador
+        remoteDataSource: IncidentRemoteData,
+        blackBoxManager: BlackBoxManager // <-- Añadimos el nuevo parámetro
     ): IncidentRepository {
-        return IncidentRepositoryImpl(dao, remoteDataSource)
+        return IncidentRepositoryImpl(dao, remoteDataSource, blackBoxManager) // <-- Se lo pasamos
     }
 }
