@@ -35,7 +35,7 @@ class IncidentDetectorUC @Inject constructor (
         // El modelo devuelve: 0=Normal, 1=Agresivo, 2=Accidente
         val classification = classifier.classify(g, j, amplitude, a, speed)
 
-        // 3. Decisión de disparo (Basada en IA + Cooldown)
+        // 3. Decisión de disparo: SOLO ACCIDENTES (Clase 2)
         if (classification == 2 && (currentTime - lastCrashTime > COOLDOWN_MS)) {
             executeEmergencyProtocol(g, amplitude, speed, j, a, lat, lon, currentTime)
             lastCrashTime = currentTime
@@ -46,16 +46,15 @@ class IncidentDetectorUC @Inject constructor (
     private fun executeEmergencyProtocol(g: Float, amplitude: Float, speed: Float, j: Float, a: Float, lat: Double, lon: Double, time: Long) {
         Log.e("SafeDriveAI", "¡Impacto Detectado! Guardando datos...")
 
-        // 1. Guardar en la Caja Negra (JSON)
+        // 1. Guardar en la Caja Negra (JSON) - Solo para accidentes reales
         blackBox.saveEventToDisk(time)
 
         // 2. Guardar en el Repositorio usando EdrModel
         scope.launch {
-
             val incident = EdrModel(
                 id = java.util.UUID.randomUUID().toString(),
-                time = LocalDateTime.now().toString(), // Fecha para humanos
-                rawTimestamp = time,        // La llave maestra para el JSON
+                time = LocalDateTime.now().toString(),
+                rawTimestamp = time,
                 gForce = g,
                 speed = speed,
                 audioAmplitude = amplitude,
@@ -63,7 +62,8 @@ class IncidentDetectorUC @Inject constructor (
                 angle = a,
                 latitude = lat,
                 longitude = lon,
-                isSynced = false
+                isSynced = false,
+                type = 2 // 2: Accidente
             )
             repository.saveIncident(incident)
         }

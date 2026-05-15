@@ -67,21 +67,34 @@ fun IncidentRoomCard(
 
             Spacer(Modifier.height(8.dp))
 
+            val statusColor = if (incident.type == 1) Color(0xFFFFA000) else MaterialTheme.colorScheme.error
+            val statusLabel = if (incident.type == 1) "Susto / Riesgo detectado" else "Impacto detectado"
+
             Row(verticalAlignment = Alignment.CenterVertically) {
-                Icon(Icons.Default.Warning, null, tint = MaterialTheme.colorScheme.error, modifier = Modifier.size(24.dp))
+                Icon(
+                    imageVector = Icons.Default.Warning,
+                    contentDescription = null,
+                    tint = statusColor,
+                    modifier = Modifier.size(24.dp)
+                )
                 Spacer(Modifier.width(12.dp))
                 Column {
                     Text(
-                        text = "${String.format("%.1f", incident.gForce)} G registrados", // <-- Usamos gForce
+                        text = statusLabel,
                         style = MaterialTheme.typography.titleMedium,
-                        fontWeight = FontWeight.Bold
+                        fontWeight = FontWeight.Bold,
+                        color = statusColor
                     )
                     Text(
-                        text = "Velocidad: ${incident.speed.toInt()} km/h", // <-- Usamos speed
+                        text = "${String.format("%.1f", incident.gForce)} G registrados",
+                        style = MaterialTheme.typography.bodyMedium,
+                        fontWeight = FontWeight.SemiBold
+                    )
+                    Text(
+                        text = "Velocidad: ${incident.speed.toInt()} km/h",
                         style = MaterialTheme.typography.bodySmall,
                         color = MaterialTheme.colorScheme.onSurfaceVariant
                     )
-                    // ¡Nuevos datos añadidos!
                     Text(
                         text = "Ruido: ${incident.audioAmplitude.toInt()} dB | Ubicación: ${String.format("%.4f", incident.latitude)}, ${String.format("%.4f", incident.longitude)}",
                         style = MaterialTheme.typography.bodySmall,

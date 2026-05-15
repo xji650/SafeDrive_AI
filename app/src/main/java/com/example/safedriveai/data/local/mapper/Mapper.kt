@@ -19,6 +19,23 @@ fun IncidentEntity.toDomainModel(): EdrModel {
         angle = this.angleAtImpact,
         latitude = this.latitude,
         longitude = this.longitude,
-        isSynced = this.isSynced
+        isSynced = this.isSynced,
+        type = this.type
+    )
+}
+
+fun EdrModel.toEntity(): IncidentEntity {
+    return IncidentEntity(
+        id = this.id,
+        timestamp = this.rawTimestamp,
+        amplitudeMicrophone = this.audioAmplitude,
+        maxGForce = this.gForce,
+        speedAtImpact = this.speed,
+        angleAtImpact = this.angle,
+        jerkAtImpact = this.jerk,
+        latitude = this.latitude,
+        longitude = this.longitude,
+        isSynced = this.isSynced,
+        type = this.type
     )
 }

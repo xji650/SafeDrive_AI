@@ -11,5 +11,6 @@ data class EdrModel(
     val angle: Float,
     val latitude: Double,
     val longitude: Double,
-    val isSynced: Boolean
+    val isSynced: Boolean,
+    val type: Int = 2 // 1: Susto, 2: Accidente
 )

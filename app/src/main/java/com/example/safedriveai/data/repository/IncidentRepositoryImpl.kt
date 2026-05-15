@@ -4,6 +4,7 @@ import com.example.safedriveai.data.local.BlackBoxManager
 import com.example.safedriveai.data.local.dao.IncidentDao
 import com.example.safedriveai.data.local.entity.IncidentEntity
 import com.example.safedriveai.data.local.mapper.toDomainModel
+import com.example.safedriveai.data.local.mapper.toEntity
 import com.example.safedriveai.data.remote.IncidentRemoteData
 import com.example.safedriveai.domain.model.EdrModel
 import com.example.safedriveai.domain.repository.IncidentRepository
@@ -18,18 +19,7 @@ class IncidentRepositoryImpl @Inject constructor(
 ) : IncidentRepository {
 
     override suspend fun saveIncident(incident: EdrModel) {
-        val entity = IncidentEntity(
-            id = incident.id,
-            timestamp = incident.rawTimestamp,
-            amplitudeMicrophone = incident.audioAmplitude,
-            maxGForce = incident.gForce,
-            speedAtImpact = incident.speed,
-            angleAtImpact = incident.angle,
-            jerkAtImpact = incident.jerk,
-            latitude = incident.latitude,
-            longitude = incident.longitude,
-            isSynced = incident.isSynced
-        )
+        val entity = incident.toEntity()
         dao.insertIncident(entity)
         syncWithCloud()
     }
