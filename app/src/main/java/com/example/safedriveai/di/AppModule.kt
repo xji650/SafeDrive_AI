@@ -11,6 +11,7 @@ import com.example.safedriveai.data.local.dao.IncidentDao
 import com.example.safedriveai.data.remote.IncidentRemoteData
 import com.example.safedriveai.data.repository.IncidentRepositoryImpl
 import com.example.safedriveai.domain.repository.IncidentRepository
+import com.example.safedriveai.ml.IncidentClassifier
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.storage.FirebaseStorage
 import dagger.Provides
@@ -57,8 +58,15 @@ class AppModule {
     fun provideIncidentRepository(
         dao: IncidentDao,
         remoteDataSource: IncidentRemoteData,
-        blackBoxManager: BlackBoxManager // <-- Añadimos el nuevo parámetro
+        blackBoxManager: BlackBoxManager
     ): IncidentRepository {
-        return IncidentRepositoryImpl(dao, remoteDataSource, blackBoxManager) // <-- Se lo pasamos
+        return IncidentRepositoryImpl(dao, remoteDataSource, blackBoxManager)
+    }
+
+    // 5. INTELIGENCIA ARTIFICIAL
+    @Provides
+    @Singleton
+    fun provideIncidentClassifier(@ApplicationContext context: Context): IncidentClassifier {
+        return IncidentClassifier(context)
     }
 }

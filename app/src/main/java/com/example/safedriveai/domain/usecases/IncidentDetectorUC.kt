@@ -8,7 +8,7 @@ import com.example.safedriveai.data.local.BlackBoxManager
 import com.example.safedriveai.data.local.entity.IncidentEntity
 import com.example.safedriveai.domain.model.EdrModel
 import com.example.safedriveai.domain.repository.IncidentRepository
-
+import com.example.safedriveai.ml.IncidentClassifier
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -17,26 +17,29 @@ import javax.inject.Inject
 
 class IncidentDetectorUC @Inject constructor (
     private val repository: IncidentRepository,
-    private val blackBox: BlackBoxManager
+    private val blackBox: BlackBoxManager,
+    private val classifier: IncidentClassifier
 ) {
     private var lastCrashTime = 0L
-    private val CRITICAL_G_THRESHOLD = 4.0f
     private val COOLDOWN_MS = 10000L
     private val scope = CoroutineScope(Dispatchers.IO)
 
     @RequiresApi(Build.VERSION_CODES.O)
     fun processTelemetry(g: Float, speed: Float, amplitude: Float, j: Float, a: Float, lat: Double = 0.0, lon: Double = 0.0) {
         val currentTime = System.currentTimeMillis()
+        
+        // 1. Siempre guardar en el búfer circular de la caja negra
         blackBox.addPoint(g, speed, amplitude, j, a, lat, lon)
 
-        if (shouldTriggerEvent(g, currentTime)) {
+        // 2. Clasificación mediante IA (Fusión Sensorial)
+        // El modelo devuelve: 0=Normal, 1=Agresivo, 2=Accidente
+        val classification = classifier.classify(g, j, amplitude, a, speed)
+
+        // 3. Decisión de disparo (Basada en IA + Cooldown)
+        if (classification == 2 && (currentTime - lastCrashTime > COOLDOWN_MS)) {
             executeEmergencyProtocol(g, amplitude, speed, j, a, lat, lon, currentTime)
             lastCrashTime = currentTime
         }
-    }
-
-    private fun shouldTriggerEvent(g: Float, currentTime: Long): Boolean {
-        return g > CRITICAL_G_THRESHOLD && (currentTime - lastCrashTime > COOLDOWN_MS)
     }
 
     @RequiresApi(Build.VERSION_CODES.O)
