@@ -97,4 +97,7 @@ dependencies {
     implementation(platform(libs.firebase.bom))
     implementation(libs.firebase.analytics)
     implementation(libs.firebase.storage.ktx)
+
+    // ── TENSORFLOW ───────────────────────────────────────
+    implementation(libs.tensorflow.lite)
 }
