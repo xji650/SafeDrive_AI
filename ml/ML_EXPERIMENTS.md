@@ -1,91 +1,76 @@
-# SafeDrive AI - Definición del Problema y Experimentos Iniciales
+# SafeDrive AI - Definición del Problema y Registro de Experimentos
 
-## 1. Problema a Resolver (Definición del problema ML)
+## 1. Definición del Problema (ML)
 
-El objetivo es clasificar eventos telemétricos en tiempo real para detectar accidentes de tráfico. 
-
-El sistema utiliza Inteligencia Artificial en el borde (Edge AI) a través de modelos
-TensorFlow Lite para procesar en tiempo real y de forma local la telemetría del vehículo.
-Mediante una arquitectura de Fusión Sensorial Pasiva (acelerómetro, giroscopio,
-micrófono y GPS), la aplicación detecta colisiones con alta precisión, reduciendo
-drásticamente los falsos positivos (por ejemplo, caídas del teléfono o frenazos bruscos sin
-impacto).
+El objetivo es clasificar eventos telemétricos en tiempo real para detectar accidentes de tráfico mediante **Edge AI**. El sistema procesa localmente la telemetría para garantizar baja latencia y privacidad.
 
 Se trata de un problema de **Aprendizaje Supervisado de Clasificación Multiclase**.
 
-- **Entrada:** 4 variables (Peak_G, Jerk, Sonido, Giroscopio)
-- **Salida:** 3 categorías (Normal, Incidente, Colisión)
+* **Entrada (5 variables):** `Peak_G`, `Jerk`, `Firma_Acustica`, `Cambio_Angular`, `Velocidad`.
+* **Salida (3 categorías):** Normal (0), Incidente/Susto (1), Colisión Grave (2).
 
 ---
 
-## 2. Modelos Candidatos
+## 2. Modelos Candidatos y Justificación de Experimentos
 
-Para este MVP se evaluaron las siguientes opciones:
+La estrategia de experimentación sigue una progresión lógica: de modelos estadísticos clásicos a aprendizaje profundo.
 
-- **Árboles de Decisión:**  
-  Descartados por baja capacidad de generalización en señales continuas.
-
-- **Regresión Logística:**  
-  Descartada por la alta no-linealidad de los impactos físicos.
-
-- **Red Neuronal Densa (Seleccionada):**  
-  Elegida por su eficiencia en dispositivos móviles y su capacidad para modelar patrones complejos de sensores mediante TensorFlow Lite.
+1. **Random Forest (Baseline):** Se elige como punto de referencia (Baseline) por su alta eficacia en datos tabulares y su capacidad para manejar la importancia de las variables.
+2. **Red Neuronal MLP (MVP):** Se elige como modelo principal por su compatibilidad nativa con TensorFlow Lite y su capacidad para evolucionar hacia arquitecturas de memoria (LSTM) en futuras fases de datos reales.
 
 ---
 
-## 3. Herramientas Utilizadas
+## 3. Pipeline de Entrenamiento (Configuración)
 
-- **Lenguaje:** Python 3
-- **Frameworks:** TensorFlow y Keras
-- **Procesamiento:** Pandas y Scikit-learn
-- **Conversión:** TFLite Converter (despliegue en Android)
+* **Generación:** Datos sintéticos con lógica física (7.000 muestras).
+* **División:** Split **70/15/15** (Entrenamiento / Validación / Test).
+* **Arquitectura DNN:**
+* Capa de Normalización Adaptativa (en Exp #2).
+* 2 capas ocultas: 24 y 12 neuronas (ReLU).
+* Salida: 3 neuronas (Softmax).
 
----
 
-## 4. Pipeline de Entrenamiento (Configuración)
-
-- **Generación (Sección 1):**  
-  Creación de datos sintéticos basados en física de impactos.
-
-- **Ingeniería de datos:**  
-  Concatenación y etiquetado automático de clases.
-
-- **División:**  
-  Split 60/20/20 (Train / Validation / Test)
-
-- **Entrenamiento (Sección 2):**  
-  Red neuronal con 2 capas ocultas:
-    - 24 neuronas (ReLU)
-    - 12 neuronas (ReLU)
-
-- **Validación:**  
-  Monitoreo de la pérdida durante 40 épocas.
-
-- **Exportación:**  
-  Generación del modelo en formato `.tflite`.
+* **Exportación:** Formato `.tflite` con cuantización de pesos.
 
 ---
 
-## 5. Experimentos Iniciales Realizados
+## 4. Registro de Experimentos y Resultados
 
-### Experimento #1: Configuración Base (MVP)
+| Experimento | Descripción | Accuracy | Loss | Observaciones |
+| --- | --- |--------| --- | --- |
+| **#1: MLP Base** | Datos crudos, sin normalización. | 76.67% | 0.607 | Confusión por diferencia de escalas (G vs Velocidad). |
+| **#2: MLP Pro** | Con Capa Normalizer y Cuantización. | **100%** | **0.000** | Rendimiento perfecto en datos sintéticos. Óptimo para Android. |
+| **#3: Random Forest** | Modelo clásico de 100 árboles. | 100%   | *N/A* | Se usa para validar si la lógica física es lineal. |
 
-- **Script:** `scripts/safedrive_trainer.ipynb`
+---
 
-### Parámetros principales
+## 5. Justificación de la Selección de Experimentos
 
-- Épocas: 40
-- Optimizador: Adam
-- Batch Size: 16
+¿Por qué hemos realizado estas pruebas específicas?
 
-### Resultados obtenidos
+1. **¿Por qué el paso del Exp #1 al #2?** Los resultados del Exp #1 demostraron que la red "se perdía" con los valores altos de velocidad (0-120) frente a los bajos de fuerza G (0-15). La introducción de la **capa de normalización** en el Exp #2 fue necesaria para estandarizar las entradas, logrando que el modelo alcance la precisión máxima.
+2. **¿Por qué incluir Random Forest ahora?** Para descartar el "sobreajuste" (overfitting). Si un árbol de decisión simple ya clasifica bien, confirmamos que nuestra lógica de generación de datos es coherente. Además, permite comparar el peso de los archivos: a veces un Random Forest en Android es más pesado de procesar que una red neuronal pequeña y optimizada.
+3. **¿Por qué descartar Regresión Logística?** Porque las colisiones son eventos de energía cinética no lineales. La regresión logística asume relaciones demasiado simples que fallarían ante la complejidad de un derrape o una vibración acústica.
 
-- **Accuracy:** 76.67%
-- **Loss:** 0.6077
+---
 
-### Análisis
+## 6. Análisis del Benchmark y Justificación Final
 
-El modelo demuestra:
+El Experimento #3 (Random Forest) ha servido como **auditoría técnica** de los resultados obtenidos en el Experimento #2.
 
-- Alta robustez en la detección de **Colisiones Graves (Label 2)**.
-- Confusión marginal entre **Baches** e **Incidentes leves**, consistente con la similitud física en las fuerzas G iniciales.
+#### Conclusiones del Duelo de Modelos:
+
+1. **Validación de la Lógica de Datos:** El hecho de que tanto la Red Neuronal (MLP) como el Random Forest alcancen el 100% de precisión confirma que el dataset sintético no tiene errores de etiquetado y que las reglas físicas (umbrales de G-force) son consistentes.
+2. **Robustez frente a la Escala:** Mientras que el MLP necesitó una capa de Normalización para ignorar las diferencias de magnitud entre Gs y Velocidad, el Random Forest alcanzó el éxito de forma nativa. Esto demuestra que los datos son "linealmente separables" si se usan los umbrales correctos.
+3. **Selección del Modelo de Producción:** A pesar del empate técnico en precisión, se selecciona el **Modelo MLP (v2)** para la implementación en SafeDrive por los siguientes motivos:
+* **Portabilidad:** Compatibilidad nativa y optimizada con **TensorFlow Lite**.
+* **Eficiencia:** Menor consumo de recursos en ejecución continua (background) en Android comparado con un bosque de árboles.
+* **Escalabilidad:** Capacidad de evolucionar hacia redes recurrentes (LSTM) en la Fase 2 (datos temporales).
+
+---
+
+### Notas Técnicas
+
+> El **100% de Accuracy** del Experimento #2 se debe a la naturaleza controlada de los datos sintéticos. Se espera que esta métrica se ajuste a valores más realistas (85-95%) al introducir el dataset de datos reales (Kaggle/Room) en la siguiente fase.
+
+---

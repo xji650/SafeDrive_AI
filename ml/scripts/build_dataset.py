@@ -10,8 +10,6 @@ os.makedirs('ml/data/processed/dataset/validation', exist_ok=True)
 # 2. LEER LOS INGREDIENTES
 # Nota: Asegúrate de tener los otros dos archivos antes de ejecutar esto, o comenta sus líneas.
 df_sintetico = pd.read_csv('ml/data/processed/source/datos_sinteticos.csv')
-df_kaggle = pd.read_csv('ml/data/processed/source/kaggle_data.csv')
-#df_room = pd.read_csv('ml/data/processed/source/mis_datos_room.csv')
 
 # 3. LA BATIDORA (Ajustado a los archivos que tengas)
 dataset_completo = pd.concat([df_sintetico], ignore_index=True) # Añade df_kaggle y df_room cuando los tengas

@@ -1,0 +1,15 @@
+--- Resultados Finales ---
+Test Loss:     0.0000
+Test Accuracy: 1.0000
+
+Primeras 10 predicciones:
+  [OK]  Pred: Posible Susto        | Real: Posible Susto
+  [OK]  Pred: Falso Positivo       | Real: Falso Positivo
+  [OK]  Pred: Falso Positivo       | Real: Falso Positivo
+  [OK]  Pred: Posible Susto        | Real: Posible Susto
+  [OK]  Pred: Falso Positivo       | Real: Falso Positivo
+  [OK]  Pred: Falso Positivo       | Real: Falso Positivo
+  [OK]  Pred: Posible Susto        | Real: Posible Susto
+  [OK]  Pred: Choque Grave         | Real: Choque Grave
+  [OK]  Pred: Posible Susto        | Real: Posible Susto
+  [OK]  Pred: Falso Positivo       | Real: Falso Positivo
