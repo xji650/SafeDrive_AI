@@ -223,7 +223,8 @@ fun EdrScreen(viewModel: EdrViewModel, initiallyInTrashMode: Boolean = false) {
                                 IncidentRoomCard(
                                     incident = incident,
                                     onOpen = { viewModel.openDetailsFromEntity(incident) },
-                                    onDelete = { incidentToDelete = incident.id }
+                                    onDelete = { incidentToDelete = incident.id },
+                                    onFeedback = { type -> viewModel.updateFeedback(incident.id, type) }
                                 )
                             }
                         }
@@ -236,7 +237,14 @@ fun EdrScreen(viewModel: EdrViewModel, initiallyInTrashMode: Boolean = false) {
                     data = data,
                     file = selectedFile!!,
                     maxG = data.maxByOrNull { it.gForce }?.gForce ?: 0f,
-                    onBack = { viewModel.closeDetails() }
+                    onBack = { viewModel.closeDetails() },
+                    onFeedback = { type -> 
+                        val incidentId = data.firstOrNull()?.id ?: ""
+                        if (incidentId.isNotEmpty()) {
+                            viewModel.updateFeedback(incidentId, type)
+                            viewModel.closeDetails() // Cerramos tras dar feedback para ver el cambio en la lista
+                        }
+                    }
                 )
             }
         }

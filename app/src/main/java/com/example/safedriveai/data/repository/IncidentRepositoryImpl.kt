@@ -115,4 +115,9 @@ class IncidentRepositoryImpl @Inject constructor(
 
         dao.purgeOldDeletedIncidents(threshold)
     }
+
+    override suspend fun updateIncidentFeedback(incidentId: String, feedbackType: Int) {
+        dao.updateIncidentType(incidentId, feedbackType)
+        syncWithCloud()
+    }
 }

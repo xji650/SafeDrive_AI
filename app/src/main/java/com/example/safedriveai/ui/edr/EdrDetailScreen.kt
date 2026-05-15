@@ -6,42 +6,38 @@ import android.content.Intent
 import android.graphics.Paint
 import android.graphics.Path
 import android.graphics.pdf.PdfDocument
-import androidx.compose.foundation.layout.Column
-import androidx.compose.runtime.Composable
-import androidx.compose.ui.Modifier
-import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.width
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.PictureAsPdf
-import androidx.compose.material3.Button
-import androidx.compose.material3.Icon
-import androidx.compose.material3.OutlinedButton
-import androidx.compose.ui.unit.dp
-import androidx.compose.material3.Text
-import androidx.compose.ui.Alignment
-import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.text.font.FontWeight
-import java.io.File
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.*
 import androidx.compose.material3.*
+import androidx.compose.runtime.Composable
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.unit.dp
 import androidx.core.content.FileProvider
 import com.example.safedriveai.domain.model.EdrModel
 import com.example.safedriveai.ui.edr.components.FeedbackButton
 import com.example.safedriveai.ui.edr.components.TelemetryGraph
+import java.io.File
 import java.util.Date
 
 @Composable
-fun EdrDetailScreen(data: List<EdrModel>, file: File, maxG: Float, onBack: () -> Unit) {
+fun EdrDetailScreen(
+    data: List<EdrModel>,
+    file: File,
+    maxG: Float,
+    onBack: () -> Unit,
+    onFeedback: (Int) -> Unit
+) {
     val context = LocalContext.current
+
+    // REGLA DE 24H: El feedback solo se permite en las primeras 24 horas
+    val rawTimestamp = data.firstOrNull()?.rawTimestamp ?: 0L
+    val isExpired = System.currentTimeMillis() - rawTimestamp > 24 * 60 * 60 * 1000
 
     // Buscamos el "frame" exacto donde ocurrió el golpe más fuerte para extraer sus datos
     val peakSnapshot = data.maxByOrNull { it.gForce }
@@ -73,12 +69,8 @@ fun EdrDetailScreen(data: List<EdrModel>, file: File, maxG: Float, onBack: () ->
                     modifier = Modifier.fillMaxWidth().padding(16.dp),
                     horizontalArrangement = Arrangement.SpaceBetween
                 ) {
-                    // Dato 1: Fuerza G Máxima
                     DataColumn(icon = Icons.Default.Warning, label = "Impacto", value = "${String.format("%.1f", maxG)} G", color = MaterialTheme.colorScheme.error)
-                    // Dato 2: Velocidad en el impacto
                     DataColumn(icon = Icons.Default.Speed, label = "Velocidad", value = "${peakSnapshot.speed.toInt()} km/h", color = MaterialTheme.colorScheme.primary)
-                    // Dato 3: Hora del impacto
-                    // Cortamos el string de la fecha para que se vea más limpio (Ej: saca solo la hora)
                     val shortTime = peakSnapshot.time.takeLast(12).take(8)
                     DataColumn(icon = Icons.Default.AccessTime, label = "Hora", value = shortTime, color = MaterialTheme.colorScheme.onSurface)
                 }
@@ -99,32 +91,40 @@ fun EdrDetailScreen(data: List<EdrModel>, file: File, maxG: Float, onBack: () ->
         Spacer(Modifier.height(24.dp))
 
         // --- FEEDBACK IA ---
-        Text(
-            text = "¿Qué ha pasado realmente?",
-            style = MaterialTheme.typography.titleMedium,
-            fontWeight = FontWeight.SemiBold,
-            color = MaterialTheme.colorScheme.onBackground
-        )
-        Text(
-            text = "Etiqueta este evento para entrenar la IA.",
-            style = MaterialTheme.typography.bodyMedium,
-            color = MaterialTheme.colorScheme.onSurfaceVariant
-        )
+        if (!isExpired) {
+            Text(
+                text = "¿Qué ha pasado realmente?",
+                style = MaterialTheme.typography.titleMedium,
+                fontWeight = FontWeight.SemiBold,
+                color = MaterialTheme.colorScheme.onBackground
+            )
+            Text(
+                text = "Etiqueta este evento para entrenar la IA.",
+                style = MaterialTheme.typography.bodyMedium,
+                color = MaterialTheme.colorScheme.onSurfaceVariant
+            )
 
-        Row(
-            modifier = Modifier.fillMaxWidth().padding(top = 12.dp),
-            horizontalArrangement = Arrangement.SpaceBetween
-        ) {
-            FeedbackButton(MaterialTheme.colorScheme.error, "Accidente") { /* CRASH */ }
-            FeedbackButton(Color(0xFFF57C00), "Susto") { /* BUMP */ }
-            FeedbackButton(Color(0xFF388E3C), "Falso") { /* FALSE */ }
+            Row(
+                modifier = Modifier.fillMaxWidth().padding(top = 12.dp),
+                horizontalArrangement = Arrangement.SpaceBetween
+            ) {
+                FeedbackButton(MaterialTheme.colorScheme.error, "Accidente") { onFeedback(2) }
+                FeedbackButton(Color(0xFFF57C00), "Susto") { onFeedback(1) }
+                FeedbackButton(Color(0xFF388E3C), "Falso") { onFeedback(0) }
+            }
+        } else {
+            Text(
+                text = "El periodo de validación (24h) ha finalizado.",
+                style = MaterialTheme.typography.bodyMedium,
+                color = Color.Gray,
+                modifier = Modifier.padding(top = 12.dp)
+            )
         }
 
         Spacer(Modifier.weight(1f))
 
         // --- EXPORTAR ---
         Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-            // AHORA EL BOTÓN JSON SÍ FUNCIONA
             OutlinedButton(
                 onClick = { shareJsonFile(context, file) },
                 modifier = Modifier.weight(1f).height(50.dp)
@@ -143,7 +143,6 @@ fun EdrDetailScreen(data: List<EdrModel>, file: File, maxG: Float, onBack: () ->
     }
 }
 
-// Mini-componente para que los datos queden ordenados en columnas
 @Composable
 fun DataColumn(icon: androidx.compose.ui.graphics.vector.ImageVector, label: String, value: String, color: Color) {
     Column(horizontalAlignment = Alignment.CenterHorizontally) {
@@ -154,7 +153,6 @@ fun DataColumn(icon: androidx.compose.ui.graphics.vector.ImageVector, label: Str
     }
 }
 
-// Función para compartir el JSON crudo
 fun shareJsonFile(context: Context, file: File) {
     val uri = FileProvider.getUriForFile(context, "${context.packageName}.provider", file)
     val intent = Intent(Intent.ACTION_SEND).apply {
@@ -172,16 +170,13 @@ fun generateAndOpenPDF(context: Context, sourceFile: File, data: List<EdrModel>,
     val page = pdfDocument.startPage(pageInfo)
     val canvas = page.canvas
     
-    // Configuración de pinceles
     val titlePaint = Paint().apply { color = android.graphics.Color.BLACK; textSize = 22f; isFakeBoldText = true }
     val headerPaint = Paint().apply { color = android.graphics.Color.BLACK; textSize = 14f; isFakeBoldText = true }
     val bodyPaint = Paint().apply { color = android.graphics.Color.BLACK; textSize = 11f }
     val grayPaint = Paint().apply { color = android.graphics.Color.GRAY; textSize = 10f }
-    val redPaint = Paint().apply { color = android.graphics.Color.parseColor("#FFEBEE") } // Rojo muy claro
+    val redPaint = Paint().apply { color = android.graphics.Color.parseColor("#FFEBEE") }
     val graphLinePaint = Paint().apply { color = android.graphics.Color.RED; strokeWidth = 2.5f; style = Paint.Style.STROKE }
 
-    // 1. LOGO Y CABECERA
-    // Dibujamos un círculo decorativo como logo
     val logoPaint = Paint().apply { color = android.graphics.Color.RED; style = Paint.Style.FILL }
     canvas.drawCircle(70f, 60f, 15f, logoPaint)
     canvas.drawText("SD", 60f, 66f, Paint().apply { color = android.graphics.Color.WHITE; textSize = 14f; isFakeBoldText = true })
@@ -189,7 +184,6 @@ fun generateAndOpenPDF(context: Context, sourceFile: File, data: List<EdrModel>,
     canvas.drawText("INFORME PERICIAL - SAFEDRIVE AI", 100f, 65f, titlePaint)
     canvas.drawLine(50f, 95f, 545f, 95f, Paint().apply { color = android.graphics.Color.BLACK; strokeWidth = 1f })
 
-    // 2. RESUMEN EJECUTIVO
     val peak = data.maxByOrNull { it.gForce }
     canvas.drawText("DATOS DEL INCIDENTE", 50f, 130f, headerPaint)
     canvas.drawText("ID Registro: ${sourceFile.name}", 50f, 150f, bodyPaint)
@@ -197,40 +191,34 @@ fun generateAndOpenPDF(context: Context, sourceFile: File, data: List<EdrModel>,
     canvas.drawText("Ubicación: Lat ${peak?.latitude ?: 0.0}, Lon ${peak?.longitude ?: 0.0}", 50f, 180f, bodyPaint)
     canvas.drawText("Velocidad de Impacto: ${peak?.speed?.toInt() ?: 0} km/h", 50f, 195f, bodyPaint)
 
-    // 3. GRÁFICA DE TELEMETRÍA CON ZONA DE IMPACTO
     canvas.drawText("ANÁLISIS DE ACELERACIÓN G", 50f, 240f, headerPaint)
     val gLeft = 70f
     val gTop = 260f
     val gRight = 525f
     val gBottom = 400f
     
-    // Cuadrícula y etiquetas
     val gridPaint = Paint().apply { color = android.graphics.Color.LTGRAY; strokeWidth = 0.5f }
     val axisLabelPaint = Paint().apply { color = android.graphics.Color.DKGRAY; textSize = 9f }
     
-    // Dibujar zona de peligro (>4G) sombreada
     val maxGraphG = (data.maxOfOrNull { it.gForce } ?: 1f).coerceAtLeast(6f)
     val scaleY = (gBottom - gTop) / maxGraphG
     val scaleX = (gRight - gLeft) / (data.size - 1).coerceAtLeast(1)
     
     val dangerY = gBottom - (4.0f * scaleY)
     if (dangerY > gTop) {
-        canvas.drawRect(gLeft, gTop, gRight, dangerY, redPaint) // Zona roja
+        canvas.drawRect(gLeft, gTop, gRight, dangerY, redPaint)
         canvas.drawText("ZONA DE IMPACTO (>4G)", gRight - 110f, gTop + 15f, axisLabelPaint.apply { color = android.graphics.Color.RED; isFakeBoldText = true })
     }
 
-    // Dibujar líneas de referencia G
     for (i in 0..maxGraphG.toInt()) {
         val y = gBottom - (i * scaleY)
         canvas.drawLine(gLeft, y, gRight, y, gridPaint)
         canvas.drawText("${i}G", gLeft - 25f, y + 4f, axisLabelPaint)
     }
 
-    // Ejes
     canvas.drawLine(gLeft, gTop, gLeft, gBottom, Paint().apply { color = android.graphics.Color.BLACK })
     canvas.drawLine(gLeft, gBottom, gRight, gBottom, Paint())
 
-    // Línea de telemetría (Sombra bajo la curva)
     if (data.isNotEmpty()) {
         val fillPath = Path()
         fillPath.moveTo(gLeft, gBottom)
@@ -253,12 +241,10 @@ fun generateAndOpenPDF(context: Context, sourceFile: File, data: List<EdrModel>,
         canvas.drawPath(path, graphLinePaint)
     }
 
-    // 4. TABLA DE PUNTOS CRÍTICOS (Top 5 momentos)
     canvas.drawText("TOP 5 PUNTOS DE MAYOR TENSIÓN", 50f, 440f, headerPaint)
     val topPoints = data.sortedByDescending { it.gForce }.take(5)
     var tableY = 470f
     
-    // Encabezado tabla
     canvas.drawText("Tiempo", 70f, tableY, headerPaint.apply { textSize = 10f })
     canvas.drawText("Fuerza G", 200f, tableY, headerPaint)
     canvas.drawText("Velocidad", 330f, tableY, headerPaint)
@@ -271,7 +257,6 @@ fun generateAndOpenPDF(context: Context, sourceFile: File, data: List<EdrModel>,
         canvas.drawText("${p.speed.toInt()} km/h", 330f, tableY, bodyPaint)
     }
 
-    // 5. DIAGNÓSTICO Y FIRMA
     canvas.drawText("DIAGNÓSTICO TÉCNICO", 50f, 620f, headerPaint)
     val diagnostic = when {
         maxG > 4.5 -> "CRÍTICO: Colisión severa detectada. Riesgo de daño estructural y lesiones."

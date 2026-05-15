@@ -115,4 +115,10 @@ class EdrViewModel @Inject constructor(
             repository.restoreAllIncidents()
         }
     }
+
+    fun updateFeedback(incidentId: String, feedbackType: Int) {
+        viewModelScope.launch {
+            repository.updateIncidentFeedback(incidentId, feedbackType)
+        }
+    }
 }

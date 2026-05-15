@@ -43,6 +43,9 @@ interface IncidentDao {
     @Query("UPDATE incidents_table SET isDeleted = 0, deletedAt = NULL, isSynced = 0 WHERE isDeleted = 1")
     suspend fun restoreAllIncidents()
 
+    @Query("UPDATE incidents_table SET type = :newType, isSynced = 0 WHERE id = :incidentId")
+    suspend fun updateIncidentType(incidentId: String, newType: Int)
+
     @Query("SELECT * FROM incidents_table WHERE isDeleted = 1 ORDER BY deletedAt DESC")
     fun getDeletedIncidents(): Flow<List<IncidentEntity>>
 

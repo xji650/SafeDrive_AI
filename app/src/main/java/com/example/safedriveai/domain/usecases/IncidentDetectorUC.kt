@@ -63,7 +63,7 @@ class IncidentDetectorUC @Inject constructor (
                 latitude = lat,
                 longitude = lon,
                 isSynced = false,
-                type = 2 // 2: Accidente
+                type = null // Se guarda como null hasta que el usuario dé feedback (Ground Truth)
             )
             repository.saveIncident(incident)
         }
