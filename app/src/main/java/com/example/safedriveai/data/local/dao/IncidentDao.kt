@@ -30,10 +30,10 @@ interface IncidentDao {
     suspend fun markAsSynced(incidentId: String)
 
     // 5. Borrado suave (Soft Delete)
-    @Query("UPDATE incidents_table SET isDeleted = 1, deletedAt = :deletedAt, isSynced = 0 WHERE id = :incidentId")
+    @Query("UPDATE incidents_table SET isDeleted = 1, deletedAt = :deletedAt, isSynced = 0 WHERE id = :incidentId AND isDeleted = 0")
     suspend fun softDeleteIncident(incidentId: String, deletedAt: Long)
 
-    @Query("UPDATE incidents_table SET isDeleted = 1, deletedAt = :deletedAt, isSynced = 0")
+    @Query("UPDATE incidents_table SET isDeleted = 1, deletedAt = :deletedAt, isSynced = 0 WHERE isDeleted = 0")
     suspend fun softDeleteAllIncidents(deletedAt: Long)
 
     // 6. Purga definitiva de registros antiguos (> 30 días en la papelera)

@@ -12,5 +12,7 @@ data class EdrModel(
     val latitude: Double,
     val longitude: Double,
     val isSynced: Boolean,
-    val type: Int? = null // null: Sin validar, 0: Falso Positivo, 1: Susto, 2: Accidente
+    val type: Int? = null, // null: Sin validar, 0: Falso Positivo, 1: Susto, 2: Accidente
+    val isDeleted: Boolean = false,
+    val deletedAt: Long? = null
 )

@@ -30,12 +30,28 @@ class IncidentRemoteData @Inject constructor(
                 storageRef.putFile(Uri.fromFile(file)).await()
             }
 
-            // 2. SUBIR EL RESUMEN A FIRESTORE
+            // 2. SUBIR EL RESUMEN A FIRESTORE (Mapeo manual para evitar errores con prefijo "is")
+            val incidentData = hashMapOf(
+                "id" to entity.id,
+                "timestamp" to entity.timestamp,
+                "amplitudeMicrophone" to entity.amplitudeMicrophone,
+                "maxGForce" to entity.maxGForce,
+                "speedAtImpact" to entity.speedAtImpact,
+                "angleAtImpact" to entity.angleAtImpact,
+                "jerkAtImpact" to entity.jerkAtImpact,
+                "latitude" to entity.latitude,
+                "longitude" to entity.longitude,
+                "isSynced" to true,
+                "type" to entity.type,
+                "isDeleted" to entity.isDeleted,
+                "deletedAt" to entity.deletedAt
+            )
+
             firestore.collection("vehiculos")
                 .document(vehicleId)
                 .collection("accidentes")
                 .document(entity.timestamp.toString())
-                .set(entity)
+                .set(incidentData)
                 .await()
 
             true // Si llega aquí sin petar, es un éxito
@@ -53,12 +69,32 @@ class IncidentRemoteData @Inject constructor(
                 .get()
                 .await()
 
-            // CHIVATO 1: Nos dirá cuántos ha encontrado
             android.util.Log.d("FIREBASE_DEBUG", "¡GET con éxito! Documentos encontrados: ${snapshot.size()}")
 
-            snapshot.toObjects(IncidentEntity::class.java)
+            snapshot.documents.mapNotNull { doc ->
+                // Mapeo manual campo a campo para máxima seguridad ante fallos de Firebase
+                try {
+                    IncidentEntity(
+                        id = doc.getString("id") ?: "",
+                        timestamp = doc.getLong("timestamp") ?: 0L,
+                        amplitudeMicrophone = doc.getDouble("amplitudeMicrophone")?.toFloat() ?: 0f,
+                        maxGForce = doc.getDouble("maxGForce")?.toFloat() ?: 0f,
+                        speedAtImpact = doc.getDouble("speedAtImpact")?.toFloat() ?: 0f,
+                        angleAtImpact = doc.getDouble("angleAtImpact")?.toFloat() ?: 0f,
+                        jerkAtImpact = doc.getDouble("jerkAtImpact")?.toFloat() ?: 0f,
+                        latitude = doc.getDouble("latitude") ?: 0.0,
+                        longitude = doc.getDouble("longitude") ?: 0.0,
+                        isSynced = true, // Si viene de la nube, está sincronizado
+                        type = doc.getLong("type")?.toInt(),
+                        isDeleted = doc.getBoolean("isDeleted") ?: doc.getBoolean("deleted") ?: false,
+                        deletedAt = doc.getLong("deletedAt")
+                    )
+                } catch (e: Exception) {
+                    android.util.Log.e("FIREBASE_MAP_ERROR", "Error mapeando documento ${doc.id}: ${e.message}")
+                    null
+                }
+            }
         } catch (e: Exception) {
-            // CHIVATO 2: Si falla el GET, nos dirá por qué
             android.util.Log.e("FIREBASE_DEBUG", "Fallo al hacer el GET: ${e.message}")
             emptyList()
         }

@@ -20,7 +20,9 @@ fun IncidentEntity.toDomainModel(): EdrModel {
         latitude = this.latitude,
         longitude = this.longitude,
         isSynced = this.isSynced,
-        type = this.type
+        type = this.type,
+        isDeleted = this.isDeleted,
+        deletedAt = this.deletedAt
     )
 }
 
@@ -36,6 +38,8 @@ fun EdrModel.toEntity(): IncidentEntity {
         latitude = this.latitude,
         longitude = this.longitude,
         isSynced = this.isSynced,
-        type = this.type
+        type = this.type,
+        isDeleted = this.isDeleted,
+        deletedAt = this.deletedAt
     )
 }

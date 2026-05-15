@@ -2,25 +2,34 @@ package com.example.safedriveai.data.local.entity
 
 import androidx.room.Entity
 import androidx.room.PrimaryKey
+import com.google.firebase.firestore.PropertyName
 import java.util.UUID
 
 @Entity(tableName = "incidents_table")
 data class IncidentEntity(
     @PrimaryKey
-    val id: String = UUID.randomUUID().toString(),
+    var id: String = UUID.randomUUID().toString(),
 
-    val timestamp: Long = 0L,
-    val amplitudeMicrophone: Float = 0f,
-    val maxGForce: Float = 0f,
-    val speedAtImpact: Float = 0f,
-    val angleAtImpact: Float = 0f,
-    val jerkAtImpact: Float = 0f,
-    val latitude: Double = 0.0,
-    val longitude: Double = 0.0,
-    val isSynced: Boolean = false,
-    val type: Int? = null, // null: Sin validar, 0: Falso Positivo, 1: Susto, 2: Accidente
-    
-    // Campos para Borrado Suave (GDPR Compliance)
-    val isDeleted: Boolean = false,
-    val deletedAt: Long? = null
+    var timestamp: Long = 0L,
+    var amplitudeMicrophone: Float = 0f,
+    var maxGForce: Float = 0f,
+    var speedAtImpact: Float = 0f,
+    var angleAtImpact: Float = 0f,
+    var jerkAtImpact: Float = 0f,
+    var latitude: Double = 0.0,
+    var longitude: Double = 0.0,
+
+    @get:PropertyName("isSynced")
+    @set:PropertyName("isSynced")
+    var isSynced: Boolean = false,
+
+    var type: Int? = null,
+
+    @get:PropertyName("isDeleted")
+    @set:PropertyName("isDeleted")
+    var isDeleted: Boolean = false,
+
+    @get:PropertyName("deletedAt")
+    @set:PropertyName("deletedAt")
+    var deletedAt: Long? = null
 )
