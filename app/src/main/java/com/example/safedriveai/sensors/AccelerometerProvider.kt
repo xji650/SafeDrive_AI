@@ -21,8 +21,15 @@ class AccelerometerProvider(context: Context) : SensorEventListener {
     private val _totalG = MutableStateFlow(1f)
     val totalG = _totalG.asStateFlow()
 
+    private val _jerk = MutableStateFlow(0f)
+    val jerk = _jerk.asStateFlow()
+
+    private var lastG = 1f
+    private var lastTimestamp = 0L
+
     fun start() {
         val accel = sensorManager.getDefaultSensor(Sensor.TYPE_ACCELEROMETER)
+        // SENSOR_DELAY_UI (~16-20Hz) es suficiente para telemetría y ahorra mucha CPU
         sensorManager.registerListener(this, accel, SensorManager.SENSOR_DELAY_UI)
     }
 
@@ -34,9 +41,23 @@ class AccelerometerProvider(context: Context) : SensorEventListener {
             val y = event.values[1]
             val z = event.values[2]
 
+            val currentG = sqrt(x*x + y*y + z*z) / 9.81f
+            val coercedG = currentG.coerceIn(0f, 15f)
+            _totalG.value = coercedG
+
+            val currentTime = System.currentTimeMillis()
+            if (lastTimestamp > 0) {
+                val dt = (currentTime - lastTimestamp) / 1000f
+                if (dt > 0) {
+                    val jerkVal = Math.abs(currentG - lastG) / dt
+                    _jerk.value = jerkVal.coerceIn(0f, 20f)
+                }
+            }
+            lastG = currentG
+            lastTimestamp = currentTime
+
             _accelX.value = x / 9.81f
             _accelY.value = y / 9.81f
-            _totalG.value = sqrt(x*x + y*y + z*z) / 9.81f
         }
     }
     override fun onAccuracyChanged(sensor: Sensor?, accuracy: Int) {}
