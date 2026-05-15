@@ -18,7 +18,8 @@ import javax.inject.Inject
 class IncidentDetectorUC @Inject constructor (
     private val repository: IncidentRepository,
     private val blackBox: BlackBoxManager,
-    private val classifier: IncidentClassifier
+    private val classifier: IncidentClassifier,
+    private val shouldTriggerDiagnostic: ShouldTriggerDiagnosticUC
 ) {
     private var lastCrashTime = 0L
     private val COOLDOWN_MS = 10000L
@@ -28,14 +29,19 @@ class IncidentDetectorUC @Inject constructor (
     fun processTelemetry(g: Float, speed: Float, amplitude: Float, j: Float, a: Float, lat: Double = 0.0, lon: Double = 0.0) {
         val currentTime = System.currentTimeMillis()
         
-        // 1. Siempre guardar en el búfer circular de la caja negra
+        // 1. Siempre guardar en el búfer circular de la caja negra (para tener el histórico de 5s)
         blackBox.addPoint(g, speed, amplitude, j, a, lat, lon)
 
-        // 2. Clasificación mediante IA (Fusión Sensorial)
-        // El modelo devuelve: 0=Normal, 1=Agresivo, 2=Accidente
+        // 2. ESCUDO HEURÍSTICO (Física pura)
+        // Si no cumple los mínimos (15km/h, 3.5G, 85dB), ignoramos.
+        if (!shouldTriggerDiagnostic(g, speed, amplitude)) {
+            return
+        }
+
+        // 3. Clasificación mediante IA (Solo si pasó el filtro físico)
         val classification = classifier.classify(g, j, amplitude, a, speed)
 
-        // 3. Decisión de disparo: SOLO ACCIDENTES (Clase 2)
+        // 4. Decisión de disparo: SOLO ACCIDENTES (Clase 2)
         if (classification == 2 && (currentTime - lastCrashTime > COOLDOWN_MS)) {
             executeEmergencyProtocol(g, amplitude, speed, j, a, lat, lon, currentTime)
             lastCrashTime = currentTime

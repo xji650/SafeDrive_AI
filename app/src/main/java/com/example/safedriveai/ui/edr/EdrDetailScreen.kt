@@ -218,10 +218,10 @@ fun generateAndOpenPDF(context: Context, sourceFile: File, data: List<EdrModel>,
     val scaleY = (gBottom - gTop) / maxGraphG
     val scaleX = (gRight - gLeft) / (data.size - 1).coerceAtLeast(1)
     
-    val dangerY = gBottom - (4.0f * scaleY)
+    val dangerY = gBottom - (3.5f * scaleY)
     if (dangerY > gTop) {
         canvas.drawRect(gLeft, gTop, gRight, dangerY, redPaint)
-        canvas.drawText("ZONA DE IMPACTO (>4G)", gRight - 110f, gTop + 15f, axisLabelPaint.apply { color = android.graphics.Color.RED; isFakeBoldText = true })
+        canvas.drawText("ZONA DE IMPACTO (>3.5G)", gRight - 120f, gTop + 15f, axisLabelPaint.apply { color = android.graphics.Color.RED; isFakeBoldText = true })
     }
 
     for (i in 0..maxGraphG.toInt()) {
@@ -267,15 +267,15 @@ fun generateAndOpenPDF(context: Context, sourceFile: File, data: List<EdrModel>,
     topPoints.forEach { p ->
         tableY += 20f
         canvas.drawText(p.time.takeLast(9), 70f, tableY, bodyPaint)
-        canvas.drawText("${String.format("%.2f", p.gForce)} G", 200f, tableY, bodyPaint.apply { isFakeBoldText = p.gForce > 4 })
+        canvas.drawText("${String.format("%.2f", p.gForce)} G", 200f, tableY, bodyPaint.apply { isFakeBoldText = p.gForce > 3.5 })
         canvas.drawText("${p.speed.toInt()} km/h", 330f, tableY, bodyPaint)
     }
 
     canvas.drawText("DIAGNÓSTICO TÉCNICO", 50f, 620f, headerPaint)
     val diagnostic = when {
-        maxG > 4.5 -> "CRÍTICO: Colisión severa detectada. Riesgo de daño estructural y lesiones."
-        maxG > 2.5 -> "ADVERTENCIA: Maniobra brusca o impacto leve registrado."
-        else -> "NORMAL: No se detectan anomalías significativas en el periodo registrado."
+        maxG > 5.0 -> "CRÍTICO: Colisión severa detectada. Riesgo de daño estructural y lesiones."
+        maxG > 3.5 -> "ADVERTENCIA: Impacto significativo registrado superando el umbral de seguridad."
+        else -> "NORMAL: No se detectan anomalías físicas que justifiquen una alerta de colisión."
     }
     canvas.drawText(diagnostic, 50f, 645f, bodyPaint.apply { isFakeBoldText = false })
 
