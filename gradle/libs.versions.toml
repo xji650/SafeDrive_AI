@@ -28,6 +28,7 @@ playServicesLocationVersion = "21.2.0"
 roomCompiler = "2.8.4"
 roomCompilerVersion = "2.6.1"
 roomVersion = "2.6.1"
+tensorflowLite = "2.17.0"
 ui = "1.10.6"
 remoteCreationCore = "1.0.0-alpha07"
 material3 = "1.4.0"
@@ -83,6 +84,7 @@ androidx-compose-runtime = { group = "androidx.compose.runtime", name = "runtime
 androidx-compiler = { group = "androidx.databinding", name = "compiler", version.ref = "compiler" }
 androidx-compose-foundation = { group = "androidx.compose.foundation", name = "foundation", version.ref = "foundation" }
 play-services-location-v2120 = { module = "com.google.android.gms:play-services-location", version.ref = "playServicesLocationVersion" }
+tensorflow-lite = { module = "org.tensorflow:tensorflow-lite", version.ref = "tensorflowLite" }
 
 [plugins]
 android-application = { id = "com.android.application", version.ref = "agp" }
