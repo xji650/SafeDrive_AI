@@ -21,6 +21,7 @@ fun EdrScreen(viewModel: EdrViewModel, initiallyInTrashMode: Boolean = false) {
     val deletedIncidents by viewModel.deletedIncidents.collectAsState()
     val selectedFile by viewModel.selectedFile.collectAsState()
     val realData by viewModel.selectedEventData.collectAsState()
+    val selectedIncident by viewModel.selectedIncident.collectAsState()
     val isSyncing by viewModel.isSyncing.collectAsState()
 
     var showDeleteAllDialog by remember { mutableStateOf(false) }
@@ -232,20 +233,18 @@ fun EdrScreen(viewModel: EdrViewModel, initiallyInTrashMode: Boolean = false) {
                 }
             }
         } else {
-            realData?.let { data ->
-                EdrDetailScreen(
-                    data = data,
-                    file = selectedFile!!,
-                    maxG = data.maxByOrNull { it.gForce }?.gForce ?: 0f,
-                    onBack = { viewModel.closeDetails() },
-                    onFeedback = { type -> 
-                        val incidentId = data.firstOrNull()?.id ?: ""
-                        if (incidentId.isNotEmpty()) {
-                            viewModel.updateFeedback(incidentId, type)
-                            viewModel.closeDetails() // Cerramos tras dar feedback para ver el cambio en la lista
+            selectedIncident?.let { incident ->
+                realData?.let { data ->
+                    EdrDetailScreen(
+                        incident = incident,
+                        telemetryData = data,
+                        file = selectedFile!!,
+                        onBack = { viewModel.closeDetails() },
+                        onFeedback = { type ->
+                            viewModel.updateFeedback(incident.id, type)
                         }
-                    }
-                )
+                    )
+                }
             }
         }
     }

@@ -20,15 +20,15 @@ datos_reales = []
 for doc in incidentes:
     dato = doc.to_dict()
 
-    # Solo cogemos los que tienen 'type' (feedback confirmado)
-    if 'type' in dato:
+    feedback_type = dato.get('type')
+    if feedback_type is not None:
         datos_reales.append({
             'Peak_G': dato.get('maxGForce', 0.0),
             'Jerk': dato.get('jerkAtImpact', 0.0),
             'Firma_Acustica': dato.get('amplitudeMicrophone', 0.0),
             'Cambio_Angular': dato.get('angleAtImpact', 0.0),
             'Velocidad': dato.get('speedAtImpact', 0.0),
-            'Label': dato.get('type')  # 0: Normal, 1: Susto, 2: Choque
+            'Label': feedback_type
         })
 
 # 4. Convertir a DataFrame y guardar como CSV

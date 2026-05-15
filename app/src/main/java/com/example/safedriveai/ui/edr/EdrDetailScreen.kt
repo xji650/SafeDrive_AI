@@ -27,20 +27,20 @@ import java.util.Date
 
 @Composable
 fun EdrDetailScreen(
-    data: List<EdrModel>,
+    incident: EdrModel,
+    telemetryData: List<EdrModel>,
     file: File,
-    maxG: Float,
     onBack: () -> Unit,
     onFeedback: (Int) -> Unit
 ) {
     val context = LocalContext.current
 
     // REGLA DE 24H: El feedback solo se permite en las primeras 24 horas
-    val rawTimestamp = data.firstOrNull()?.rawTimestamp ?: 0L
-    val isExpired = System.currentTimeMillis() - rawTimestamp > 24 * 60 * 60 * 1000
+    val isExpired = System.currentTimeMillis() - incident.rawTimestamp > 24 * 60 * 60 * 1000L
 
     // Buscamos el "frame" exacto donde ocurrió el golpe más fuerte para extraer sus datos
-    val peakSnapshot = data.maxByOrNull { it.gForce }
+    val peakSnapshot = telemetryData.maxByOrNull { it.gForce }
+    val maxG = peakSnapshot?.gForce ?: 0f
 
     Column(modifier = Modifier.fillMaxSize().padding(16.dp)) {
         // --- CABECERA ---
@@ -80,8 +80,8 @@ fun EdrDetailScreen(
         Spacer(Modifier.height(20.dp))
 
         // --- GRÁFICA REAL ---
-        if (data.isNotEmpty()) {
-            TelemetryGraph(data)
+        if (telemetryData.isNotEmpty()) {
+            TelemetryGraph(telemetryData)
         } else {
             Box(modifier = Modifier.fillMaxWidth().height(200.dp), contentAlignment = Alignment.Center) {
                 Text("Error leyendo datos del archivo", color = MaterialTheme.colorScheme.error)
@@ -93,13 +93,13 @@ fun EdrDetailScreen(
         // --- FEEDBACK IA ---
         if (!isExpired) {
             Text(
-                text = "¿Qué ha pasado realmente?",
+                text = if (incident.type == null) "¿Qué ha pasado realmente?" else "Feedback registrado",
                 style = MaterialTheme.typography.titleMedium,
                 fontWeight = FontWeight.SemiBold,
-                color = MaterialTheme.colorScheme.onBackground
+                color = if (incident.type == null) MaterialTheme.colorScheme.onBackground else MaterialTheme.colorScheme.primary
             )
             Text(
-                text = "Etiqueta este evento para entrenar la IA.",
+                text = if (incident.type == null) "Etiqueta este evento para entrenar la IA." else "Puedes cambiar el tipo si es necesario antes de las 24h.",
                 style = MaterialTheme.typography.bodyMedium,
                 color = MaterialTheme.colorScheme.onSurfaceVariant
             )
@@ -108,9 +108,23 @@ fun EdrDetailScreen(
                 modifier = Modifier.fillMaxWidth().padding(top = 12.dp),
                 horizontalArrangement = Arrangement.SpaceBetween
             ) {
-                FeedbackButton(MaterialTheme.colorScheme.error, "Accidente") { onFeedback(2) }
-                FeedbackButton(Color(0xFFF57C00), "Susto") { onFeedback(1) }
-                FeedbackButton(Color(0xFF388E3C), "Falso") { onFeedback(0) }
+                FeedbackButton(
+                    color = MaterialTheme.colorScheme.error,
+                    label = "Accidente",
+                    isSelected = incident.type == 2
+                ) { onFeedback(2) }
+
+                FeedbackButton(
+                    color = Color(0xFFF57C00),
+                    label = "Susto",
+                    isSelected = incident.type == 1
+                ) { onFeedback(1) }
+
+                FeedbackButton(
+                    color = Color(0xFF388E3C),
+                    label = "Falso",
+                    isSelected = incident.type == 0
+                ) { onFeedback(0) }
             }
         } else {
             Text(
@@ -132,7 +146,7 @@ fun EdrDetailScreen(
                 Text("Exportar JSON")
             }
             Button(
-                onClick = { generateAndOpenPDF(context, file, data, maxG) },
+                onClick = { generateAndOpenPDF(context, file, telemetryData, maxG) },
                 modifier = Modifier.weight(1f).height(50.dp)
             ) {
                 Icon(Icons.Default.PictureAsPdf, null)
@@ -252,7 +266,9 @@ fun generateAndOpenPDF(context: Context, sourceFile: File, data: List<EdrModel>,
     
     topPoints.forEach { p ->
         tableY += 20f
-        canvas.drawText(p.time.takeLast(8), 70f, tableY, bodyPaint)
+        // Extraemos HH:mm:ss (caracteres del 11 al 19) para evitar mostrar milisegundos
+        val cleanTime = if (p.time.length >= 19) p.time.substring(11, 19) else p.time
+        canvas.drawText(cleanTime, 70f, tableY, bodyPaint)
         canvas.drawText("${String.format("%.2f", p.gForce)} G", 200f, tableY, bodyPaint.apply { isFakeBoldText = p.gForce > 4 })
         canvas.drawText("${p.speed.toInt()} km/h", 330f, tableY, bodyPaint)
     }

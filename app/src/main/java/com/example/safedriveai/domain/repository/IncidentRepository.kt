@@ -21,6 +21,7 @@ interface IncidentRepository {
     suspend fun deleteAllIncidents()
     suspend fun purgeDeletedData()
     fun getDeletedIncidents(): Flow<List<EdrModel>>
+    fun getIncidentById(incidentId: String): Flow<EdrModel?>
 
     // Actualiza el tipo de incidente según el feedback del usuario
     suspend fun updateIncidentFeedback(incidentId: String, feedbackType: Int)

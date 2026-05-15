@@ -100,6 +100,9 @@ class IncidentRepositoryImpl @Inject constructor(
     override fun getDeletedIncidents(): Flow<List<EdrModel>> =
         dao.getDeletedIncidents().map { entities -> entities.map { it.toDomainModel() } }
 
+    override fun getIncidentById(incidentId: String): Flow<EdrModel?> =
+        dao.getIncidentByIdFlow(incidentId).map { it?.toDomainModel() }
+
     override suspend fun purgeDeletedData() {
         val thirtyDaysInMillis = 30L * 24 * 60 * 60 * 1000
         val threshold = System.currentTimeMillis() - thirtyDaysInMillis
@@ -117,7 +120,13 @@ class IncidentRepositoryImpl @Inject constructor(
     }
 
     override suspend fun updateIncidentFeedback(incidentId: String, feedbackType: Int) {
-        dao.updateIncidentType(incidentId, feedbackType)
-        syncWithCloud()
+        val incident = dao.getIncidentById(incidentId) ?: return
+        val currentTime = System.currentTimeMillis()
+        val limitTime = 24 * 60 * 60 * 1000L // 24 horas
+
+        if (currentTime - incident.timestamp <= limitTime) {
+            dao.updateIncidentType(incidentId, feedbackType)
+            syncWithCloud()
+        }
     }
 }

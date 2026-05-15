@@ -52,6 +52,12 @@ interface IncidentDao {
     @Query("SELECT * FROM incidents_table WHERE isDeleted = 1")
     suspend fun getDeletedIncidentsDirect(): List<IncidentEntity>
 
+    @Query("SELECT * FROM incidents_table WHERE id = :incidentId")
+    suspend fun getIncidentById(incidentId: String): IncidentEntity?
+
+    @Query("SELECT * FROM incidents_table WHERE id = :incidentId")
+    fun getIncidentByIdFlow(incidentId: String): Flow<IncidentEntity?>
+
     @Query("DELETE FROM incidents_table WHERE isDeleted = 1 AND deletedAt < :threshold")
     suspend fun purgeOldDeletedIncidents(threshold: Long)
 }
