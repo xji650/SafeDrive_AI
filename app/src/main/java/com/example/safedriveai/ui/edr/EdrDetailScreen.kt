@@ -259,16 +259,14 @@ fun generateAndOpenPDF(context: Context, sourceFile: File, data: List<EdrModel>,
     val topPoints = data.sortedByDescending { it.gForce }.take(5)
     var tableY = 470f
     
-    canvas.drawText("Tiempo", 70f, tableY, headerPaint.apply { textSize = 10f })
+    canvas.drawText("Minuto", 70f, tableY, headerPaint.apply { textSize = 10f })
     canvas.drawText("Fuerza G", 200f, tableY, headerPaint)
     canvas.drawText("Velocidad", 330f, tableY, headerPaint)
     canvas.drawLine(50f, tableY + 5f, 545f, tableY + 5f, Paint().apply { color = android.graphics.Color.LTGRAY })
     
     topPoints.forEach { p ->
         tableY += 20f
-        // Extraemos HH:mm:ss (caracteres del 11 al 19) para evitar mostrar milisegundos
-        val cleanTime = if (p.time.length >= 19) p.time.substring(11, 19) else p.time
-        canvas.drawText(cleanTime, 70f, tableY, bodyPaint)
+        canvas.drawText(p.time.takeLast(9), 70f, tableY, bodyPaint)
         canvas.drawText("${String.format("%.2f", p.gForce)} G", 200f, tableY, bodyPaint.apply { isFakeBoldText = p.gForce > 4 })
         canvas.drawText("${p.speed.toInt()} km/h", 330f, tableY, bodyPaint)
     }
