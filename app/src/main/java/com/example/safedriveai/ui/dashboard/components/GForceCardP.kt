@@ -21,7 +21,7 @@ import com.example.safedriveai.ui.dashboard.CardBackground
 import com.example.safedriveai.ui.dashboard.NeonGreen
 
 @Composable
-fun GForceCard(accelX: Float, accelY: Float, modifier: Modifier = Modifier) { // Recibe los datos reales
+fun GForceCardP(accelX: Float, accelY: Float, modifier: Modifier = Modifier) { // Recibe los datos reales
     Card(
         modifier = modifier.fillMaxWidth(),
         colors = CardDefaults.cardColors(containerColor = CardBackground)

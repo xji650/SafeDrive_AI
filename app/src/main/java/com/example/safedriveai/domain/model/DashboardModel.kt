@@ -7,6 +7,8 @@ data class DashboardModel(
     val accelY: Float = 0f,
     val speed: Float = 0f,
     val amplitude: Float = 0f,
+    val jerk: Float = 0f,
+    val angularVelocity: Float = 0f,
     val currentActivity: String = "UNKNOWN",
     val location: Location? = null,
     val isEmergencyActive: Boolean = false

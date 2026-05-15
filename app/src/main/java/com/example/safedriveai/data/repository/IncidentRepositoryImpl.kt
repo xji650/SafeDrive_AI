@@ -24,6 +24,8 @@ class IncidentRepositoryImpl @Inject constructor(
             amplitudeMicrophone = incident.audioAmplitude,
             maxGForce = incident.gForce,
             speedAtImpact = incident.speed,
+            angleAtImpact = incident.angle,
+            jerkAtImpact = incident.jerk,
             latitude = incident.latitude,
             longitude = incident.longitude,
             isSynced = incident.isSynced
@@ -83,10 +85,6 @@ class IncidentRepositoryImpl @Inject constructor(
         dao.markAsSynced(incidentId)
     }
 
-    /**
-     * Borrado suave (RGPD):
-     * Oculta el registro de la vista del usuario y marca el inicio del periodo de 30 días.
-     */
     override suspend fun deleteIncident(incidentId: String) {
         val currentTime = System.currentTimeMillis()
         dao.softDeleteIncident(incidentId, currentTime)
@@ -112,27 +110,19 @@ class IncidentRepositoryImpl @Inject constructor(
     override fun getDeletedIncidents(): Flow<List<EdrModel>> =
         dao.getDeletedIncidents().map { entities -> entities.map { it.toDomainModel() } }
 
-    /**
-     * Purga definitiva (Mantenimiento):
-     * Borra FÍSICAMENTE los datos que llevan más de 30 días en la "papelera".
-     */
     override suspend fun purgeDeletedData() {
         val thirtyDaysInMillis = 30L * 24 * 60 * 60 * 1000
         val threshold = System.currentTimeMillis() - thirtyDaysInMillis
         val dummyVehicleId = "vehiculo_prueba_01"
 
-        // 1. Obtenemos los registros que ya han expirado para limpiar sus archivos
         val allRecords = dao.getAllIncidentsDirect()
         val toHardDelete = allRecords.filter { it.isDeleted && (it.deletedAt ?: 0) < threshold }
 
         toHardDelete.forEach { entity ->
-            // Borrado físico del archivo JSON local
             blackBoxManager.deleteEventFile(entity.timestamp)
-            // Borrado físico en la nube (Firestore + Storage)
             remoteDataSource.deleteIncidentFromCloud(entity.timestamp, dummyVehicleId)
         }
 
-        // 2. Limpieza definitiva en la base de datos Room
         dao.purgeOldDeletedIncidents(threshold)
     }
 }

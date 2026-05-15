@@ -9,12 +9,14 @@ import java.util.Locale
 fun IncidentEntity.toDomainModel(): EdrModel {
     val sdf = SimpleDateFormat("dd/MM/yyyy HH:mm:ss", Locale.getDefault())
     return EdrModel(
-        id = this.id, // Mapeamos el ID de la base de datos
+        id = this.id,
         time = sdf.format(Date(this.timestamp)),
         rawTimestamp = this.timestamp,
         gForce = this.maxGForce,
         speed = this.speedAtImpact,
         audioAmplitude = this.amplitudeMicrophone,
+        jerk = this.jerkAtImpact,
+        angle = this.angleAtImpact,
         latitude = this.latitude,
         longitude = this.longitude,
         isSynced = this.isSynced

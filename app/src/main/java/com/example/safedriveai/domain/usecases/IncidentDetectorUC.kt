@@ -25,12 +25,12 @@ class IncidentDetectorUC @Inject constructor (
     private val scope = CoroutineScope(Dispatchers.IO)
 
     @RequiresApi(Build.VERSION_CODES.O)
-    fun processTelemetry(g: Float, speed: Float, amplitude: Float, lat: Double = 0.0, lon: Double = 0.0) {
+    fun processTelemetry(g: Float, speed: Float, amplitude: Float, j: Float, a: Float, lat: Double = 0.0, lon: Double = 0.0) {
         val currentTime = System.currentTimeMillis()
-        blackBox.addPoint(g, speed, amplitude, lat, lon)
+        blackBox.addPoint(g, speed, amplitude, j, a, lat, lon)
 
         if (shouldTriggerEvent(g, currentTime)) {
-            executeEmergencyProtocol(g, amplitude, speed, lat, lon, currentTime)
+            executeEmergencyProtocol(g, amplitude, speed, j, a, lat, lon, currentTime)
             lastCrashTime = currentTime
         }
     }
@@ -40,7 +40,7 @@ class IncidentDetectorUC @Inject constructor (
     }
 
     @RequiresApi(Build.VERSION_CODES.O)
-    private fun executeEmergencyProtocol(g: Float, amplitude: Float, speed: Float, lat: Double, lon: Double, time: Long) {
+    private fun executeEmergencyProtocol(g: Float, amplitude: Float, speed: Float, j: Float, a: Float, lat: Double, lon: Double, time: Long) {
         Log.e("SafeDriveAI", "¡Impacto Detectado! Guardando datos...")
 
         // 1. Guardar en la Caja Negra (JSON)
@@ -56,6 +56,8 @@ class IncidentDetectorUC @Inject constructor (
                 gForce = g,
                 speed = speed,
                 audioAmplitude = amplitude,
+                jerk = j,
+                angle = a,
                 latitude = lat,
                 longitude = lon,
                 isSynced = false

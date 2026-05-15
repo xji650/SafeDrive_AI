@@ -14,7 +14,7 @@ import com.example.safedriveai.domain.model.DashboardModel
 import com.example.safedriveai.ui.dashboard.components.ActivityMonitorCard
 import com.example.safedriveai.ui.dashboard.components.AudioAuraCard
 import com.example.safedriveai.ui.dashboard.components.EmergencyButton
-import com.example.safedriveai.ui.dashboard.components.GForceCard
+import com.example.safedriveai.ui.dashboard.components.GForceCardL
 import com.example.safedriveai.ui.dashboard.components.IntegratedSpeedometerCard
 import com.example.safedriveai.ui.dashboard.components.MapSecurityCard
 
@@ -46,11 +46,17 @@ fun DashboardLandscapeLayout(
 
         // --- COLUMNA DERECHA ---
         Column(modifier = Modifier.weight(0.3f), verticalArrangement = Arrangement.spacedBy(12.dp)) {
-            GForceCard(accelX = uiState.accelX, accelY = uiState.accelY, modifier = Modifier.weight(1.2f))
+            GForceCardL(
+                accelX = uiState.accelX,
+                accelY = uiState.accelY,
+                jerk = uiState.jerk,
+                angularVelocity = uiState.angularVelocity,
+                modifier = Modifier.weight(1.2f)
+            )
             AudioAuraCard(
                 uiState.amplitude,
                 Modifier.weight(0.8f)
-            ) // Asegúrate de quitar la altura fija en AudioAuraCard
+            )
         }
     }
 }

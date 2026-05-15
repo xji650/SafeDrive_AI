@@ -21,8 +21,10 @@ class DashboardViewModel @Inject constructor(
         sensorRepository.accelY,        // Índice 1
         sensorRepository.speed,         // Índice 2
         sensorRepository.amplitude,     // Índice 3
-        ActivityState.currentActivity,  // Índice 4
-        sensorRepository.currentLocation // Índice 5
+        sensorRepository.jerk,          // Índice 4
+        sensorRepository.angularVelocity, // Índice 5
+        ActivityState.currentActivity,  // Índice 6
+        sensorRepository.currentLocation // Índice 7
     ) { array ->
         // 'array' contiene los valores en el mismo orden de arriba
         DashboardModel(
@@ -30,17 +32,14 @@ class DashboardViewModel @Inject constructor(
             accelY = array[1] as Float,
             speed = array[2] as Float,
             amplitude = array[3] as Float,
-            currentActivity = array[4] as String,
-            location = array[5] as Location?
+            jerk = array[4] as Float,
+            angularVelocity = array[5] as Float,
+            currentActivity = array[6] as String,
+            location = array[7] as Location?
         )
     }.stateIn(
         scope = viewModelScope,
         started = SharingStarted.WhileSubscribed(5000),
         initialValue = DashboardModel()
     )
-
-    @RequiresApi(Build.VERSION_CODES.O)
-    fun startSensors() = sensorRepository.startListening()
-
-    fun stopSensors() = sensorRepository.stopListening()
 }

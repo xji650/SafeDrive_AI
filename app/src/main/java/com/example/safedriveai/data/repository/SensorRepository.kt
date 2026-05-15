@@ -6,6 +6,7 @@ import androidx.annotation.RequiresApi
 import com.example.safedriveai.domain.usecases.IncidentDetectorUC
 import com.example.safedriveai.sensors.AccelerometerProvider
 import com.example.safedriveai.sensors.AudioProvider
+import com.example.safedriveai.sensors.GyroscopeProvider
 import com.example.safedriveai.sensors.LocationProvider
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -25,10 +26,13 @@ class SensorRepository @Inject constructor(
     private val accelProvider = AccelerometerProvider(context)
     private val locationProvider = LocationProvider(context)
     private val audioProvider = AudioProvider()
+    private val gyroProvider = GyroscopeProvider(context)
 
     val accelX = accelProvider.accelX
     val accelY = accelProvider.accelY
     val totalG = accelProvider.totalG
+    val jerk = accelProvider.jerk
+    val angularVelocity = gyroProvider.angularVelocity
     val speed = locationProvider.speed
     val amplitude = audioProvider.amplitude
     val currentLocation = locationProvider.currentLocation
@@ -40,16 +44,19 @@ class SensorRepository @Inject constructor(
         accelProvider.start()
         locationProvider.start()
         audioProvider.start()
+        gyroProvider.start()
 
         scope.launch {
             totalG.collect { g ->
-                val location = currentLocation.value // Obtenemos la última posición conocida
+                val location = currentLocation.value
                 detector.processTelemetry(
-                    g,
-                    speed.value,
-                    amplitude.value,
-                    location?.latitude ?: 0.0,
-                    location?.longitude ?: 0.0
+                    g = g,
+                    speed = speed.value,
+                    amplitude = amplitude.value,
+                    j = jerk.value,
+                    a = angularVelocity.value,
+                    lat = location?.latitude ?: 0.0,
+                    lon = location?.longitude ?: 0.0
                 )
             }
         }
@@ -59,6 +66,7 @@ class SensorRepository @Inject constructor(
         accelProvider.stop()
         locationProvider.stop()
         audioProvider.stop()
+        gyroProvider.stop()
         scope.coroutineContext.cancelChildren()
     }
 }

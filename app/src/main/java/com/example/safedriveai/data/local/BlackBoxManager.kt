@@ -10,7 +10,9 @@ import com.google.gson.reflect.TypeToken
 import dagger.hilt.android.qualifiers.ApplicationContext
 import javax.inject.Inject
 import java.io.File
-import java.time.LocalDateTime
+import java.text.SimpleDateFormat
+import java.util.Date
+import java.util.Locale
 import java.util.UUID
 
 class BlackBoxManager @Inject constructor (
@@ -18,21 +20,26 @@ class BlackBoxManager @Inject constructor (
 ) {
     private val buffer = mutableListOf<EdrModel>()
     private val MAX_SAMPLES = 300
+    // Reutilizamos el formateador para ahorrar recursos
+    private val dateFormat = SimpleDateFormat("yyyy-MM-dd HH:mm:ss.SSS", Locale.getDefault())
 
     @RequiresApi(Build.VERSION_CODES.O)
-    fun addPoint(g: Float, s: Float, a: Float, lat: Double, lon: Double) {
+    fun addPoint(g: Float, speed: Float, amplitude: Float, j: Float, a: Float, lat: Double, lon: Double) {
         if (buffer.size >= MAX_SAMPLES) buffer.removeAt(0)
 
         val currentMillis = System.currentTimeMillis()
 
+        // Añadimos ID y Fecha de forma eficiente
         buffer.add(
             EdrModel(
                 id = UUID.randomUUID().toString(),
-                time = LocalDateTime.now().toString(),
+                time = dateFormat.format(Date(currentMillis)),
                 rawTimestamp = currentMillis,
                 gForce = g,
-                speed = s,
-                audioAmplitude = a,
+                speed = speed,
+                audioAmplitude = amplitude,
+                jerk = j,
+                angle = a,
                 latitude = lat,
                 longitude = lon,
                 isSynced = false

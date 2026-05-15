@@ -15,7 +15,7 @@ import com.example.safedriveai.domain.model.DashboardModel
 import com.example.safedriveai.ui.dashboard.components.ActivityMonitorCard
 import com.example.safedriveai.ui.dashboard.components.AudioAuraCard
 import com.example.safedriveai.ui.dashboard.components.EmergencyButton
-import com.example.safedriveai.ui.dashboard.components.GForceCard
+import com.example.safedriveai.ui.dashboard.components.GForceCardP
 import com.example.safedriveai.ui.dashboard.components.MapSecurityCard
 import com.example.safedriveai.ui.dashboard.components.SpeedometerCard
 import com.example.safedriveai.ui.dashboard.components.TopStatusBar
@@ -45,7 +45,7 @@ fun DashboardPortraitLayout(
         }
 
         Row(modifier = Modifier.height(200.dp), horizontalArrangement = Arrangement.spacedBy(12.dp)) {
-            Box(modifier = Modifier.weight(1f)) { GForceCard(uiState.accelX, uiState.accelY) }
+            Box(modifier = Modifier.weight(1f)) { GForceCardP(uiState.accelX, uiState.accelY, ) }
             Box(modifier = Modifier.weight(1f)) { AudioAuraCard(uiState.amplitude) }
         }
 

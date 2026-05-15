@@ -13,6 +13,8 @@ data class IncidentEntity(
     val amplitudeMicrophone: Float = 0f,
     val maxGForce: Float = 0f,
     val speedAtImpact: Float = 0f,
+    val angleAtImpact: Float = 0f,
+    val jerkAtImpact: Float = 0f,
     val latitude: Double = 0.0,
     val longitude: Double = 0.0,
     val isSynced: Boolean = false,
