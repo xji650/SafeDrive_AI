@@ -4,6 +4,7 @@ import android.app.*
 import android.content.Intent
 import android.os.Build
 import android.os.IBinder
+import android.content.pm.ServiceInfo
 import androidx.core.app.NotificationCompat
 import com.example.safedriveai.data.repository.SensorRepository
 import dagger.hilt.android.AndroidEntryPoint
@@ -29,7 +30,11 @@ class LocationService : Service() {
             .build()
 
         // 2. Arrancamos el escudo protector de Android
-        startForeground(1, notification)
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+            startForeground(1, notification, ServiceInfo.FOREGROUND_SERVICE_TYPE_LOCATION)
+        } else {
+            startForeground(1, notification)
+        }
 
         // 3. Encendemos los sensores
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {

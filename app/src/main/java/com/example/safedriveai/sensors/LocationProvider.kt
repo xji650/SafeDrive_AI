@@ -60,6 +60,6 @@ class LocationProvider(private val context: Context) {
     private fun updateLocationData(location: Location) {
         _currentLocation.value = location
         val speedInKmH = location.speed * 3.6f
-        _speed.value = if (speedInKmH < 1.5f) 0f else speedInKmH
+        _speed.value = speedInKmH.coerceIn(0f, 200f)
     }
 }
