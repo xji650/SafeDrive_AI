@@ -11,11 +11,27 @@ import com.example.safedriveai.sensors.ActivityState
 import dagger.hilt.android.lifecycle.HiltViewModel
 import javax.inject.Inject
 import kotlinx.coroutines.flow.*
+import kotlinx.coroutines.launch
 
 @HiltViewModel
 class DashboardViewModel @Inject constructor(
     private val sensorRepository: SensorRepository
 ) : ViewModel() {
+
+    @RequiresApi(Build.VERSION_CODES.O)
+    fun startDemoSimulation(context: android.content.Context) {
+        viewModelScope.launch {
+            try {
+                val csvContent = context.assets.open("choque_simulado.csv")
+                    .bufferedReader()
+                    .readLines()
+                sensorRepository.triggerDemoSimulation(csvContent)
+            } catch (e: Exception) {
+                e.printStackTrace()
+            }
+        }
+    }
+
     val uiState: StateFlow<DashboardModel> = combine(
         sensorRepository.accelX,        // Índice 0
         sensorRepository.accelY,        // Índice 1

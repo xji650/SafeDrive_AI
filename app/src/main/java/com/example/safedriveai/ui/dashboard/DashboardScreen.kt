@@ -39,7 +39,10 @@ fun DashboardScreen(viewModel: DashboardViewModel, isLandscape: Boolean) {
         if (isLandscape) {
             DashboardLandscapeLayout(uiState)
         } else {
-            DashboardPortraitLayout(uiState)
+            DashboardPortraitLayout(
+                uiState = uiState,
+                onLongClickLogo = { viewModel.startDemoSimulation(context) }
+            )
         }
     }
 }

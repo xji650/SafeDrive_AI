@@ -3,6 +3,9 @@ from firebase_admin import credentials
 from firebase_admin import firestore
 import pandas as pd
 
+# 0. Crear la carpeta de destino
+os.makedirs('ml/data/processed/source', exist_ok=True)
+
 # 1. Conectar con tu Firebase (Reemplaza con tu archivo de credenciales)
 cred = credentials.Certificate("ruta/a/tus/credenciales-firebase.json")
 firebase_admin.initialize_app(cred)
@@ -37,7 +40,7 @@ df_real = pd.DataFrame(datos_reales)
 # Limpiar posibles nulos
 df_real = df_real.dropna()
 
-df_real.to_csv('datos_reales_feedback.csv', index=False)
+df_real.to_csv('ml/data/processed/source/datos_reales_feedback.csv', index=False)
 
 print(f"¡Éxito! Se ha creado el dataset con {len(df_real)} incidentes reales.")
 print(df_real.head())

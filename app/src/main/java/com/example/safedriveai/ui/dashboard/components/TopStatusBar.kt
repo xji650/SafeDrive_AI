@@ -1,6 +1,8 @@
 package com.example.safedriveai.ui.dashboard.components
 
+import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.background
+import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -30,8 +32,9 @@ import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
 
+@OptIn(ExperimentalFoundationApi::class)
 @Composable
-fun TopStatusBar() {
+fun TopStatusBar(onLongClickLogo: () -> Unit = {}) {
     // Reloj en tiempo real
     var currentTime by remember { mutableStateOf("") }
 
@@ -51,7 +54,12 @@ fun TopStatusBar() {
         verticalAlignment = Alignment.CenterVertically
     ) {
         // Izquierda: Título y Versión
-        Column {
+        Column(
+            modifier = Modifier.combinedClickable(
+                onClick = { },
+                onLongClick = { onLongClickLogo() }
+            )
+        ) {
             Text(
                 text = "SAFEDRIVE AI",
                 color = Color(0xFF3B82F6), // Azul tecnología

@@ -22,11 +22,12 @@ import com.example.safedriveai.ui.dashboard.components.TopStatusBar
 
 @Composable
 fun DashboardPortraitLayout(
-    uiState: DashboardModel
+    uiState: DashboardModel,
+    onLongClickLogo: () -> Unit = {}
 ) {
     // SIN SCROLL. Usamos weights para empujar todo a su sitio.
     Column(modifier = Modifier.fillMaxSize().padding(16.dp), verticalArrangement = Arrangement.spacedBy(12.dp)) {
-        TopStatusBar()
+        TopStatusBar(onLongClickLogo = onLongClickLogo)
 
         // El mapa actúa como un resorte: ocupa todo el espacio sobrante
         Box(modifier = Modifier.weight(1f).fillMaxWidth()) {

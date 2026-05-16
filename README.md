@@ -27,7 +27,7 @@ Esto ha resultado en un código menos modular y más difícil de mantener, aunqu
 
 ## 3. Módulos Principales del Sistema (en desarrollo)
 
-1.  **Dashboard de Telemetría:** Visualización en tiempo real de datos de sensores y estado del sistema.
+1.  **Dashboard de Telemetría:** Visualización en tiempo real de datos de sensores y estado del sistema. Incluye el **Modo de Simulación HIL** (pulsación larga en logo) para demostraciones controladas.
 
 2.  **Diagnóstico de permisos:** Gestión de permisos críticos (ubicación, micrófono, sensores) con flujos de solicitud claros.
 
@@ -37,9 +37,11 @@ Esto ha resultado en un código menos modular y más difícil de mantener, aunqu
 
 ## 4. Instrucciones para Ejecutar la App
 
-1.  **Requisitos:** Android Studio Ladybug, dispositivo Android 10+ y archivo del modelo en `ml/scripts/safedrive_cu03_model.tflite`.
+1.  **Requisitos:** Android Studio Ladybug, dispositivo Android 10+ y archivo del modelo en `app/src/main/assets/safedrive_v4.tflite`.
 
-2.  **Clonación:** `git clone https://github.com/xji650/SafeDrive_AI.git`.
+2.  **Simulación HIL (Modo Demo):** Para demostraciones sin vehículo, activar el modo mediante pulsación larga en el logo "SAFEDRIVE AI" en el Dashboard.
+
+3.  **Clonación:** `git clone https://github.com/xji650/SafeDrive_AI.git`.
 
 3.  **Sincronización:** Abrir en Android Studio y sincronizar archivos Gradle.
 
@@ -69,11 +71,11 @@ Esto ha resultado en un código menos modular y más difícil de mantener, aunqu
 │   └── ml/         # Integración de modelos
 │
 ├── ml/        # Código y documentación del Sistema de ML
-│   ├── data/        # Datasets (dataset.zip)
-│   ├── experiments/ # Resultados de entrenamiento (.txt)
-│   ├── models/      # Modelos finales (.tflite)
-│   ├── scripts/     # Notebooks (.ipynb)
-│   └── ML_EXPERIMENTS.md
+│   ├── data/        # Datasets (datos_sinteticos.csv)
+│   ├── experiments/ # Resultados de entrenamiento y comparativas
+│   ├── models/      # Versiones del modelo exportado
+│   ├── scripts/     # Motor de simulación (generate_dataset.py) y entrenamiento
+│   └── ML_EXPERIMENTS.md # Memoria técnica del modelo
 └── README.md  # Este archivo
 
 ```
