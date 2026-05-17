@@ -44,3 +44,8 @@ Thumbs.db
 /test-results/
 /espresso-reports/
 /out/
+
+# --- RAG ---
+**/ml/RAG/data/
+**/ml/RAG/chroma_db/
+*.tsv
