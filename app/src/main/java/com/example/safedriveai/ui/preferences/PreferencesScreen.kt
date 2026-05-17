@@ -15,7 +15,6 @@ import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun PreferencesScreen(
     viewModel: PreferencesViewModel
@@ -23,29 +22,27 @@ fun PreferencesScreen(
     val uiState by viewModel.uiState.collectAsState()
     var showThemeDialog by remember { mutableStateOf(false) }
 
-    if (showThemeDialog) {
-        ThemeSelectionDialog(
-            currentMode = uiState.darkMode,
-            onDismiss = { showThemeDialog = false },
-            onSelect = {
-                viewModel.setDarkMode(it)
-                showThemeDialog = false
-            }
-        )
-    }
-
     Column(
         modifier = Modifier
             .fillMaxSize()
             .verticalScroll(rememberScrollState())
             .padding(16.dp)
     ) {
-        Text(
-            text = "Configuración",
-            style = MaterialTheme.typography.headlineMedium,
-            fontWeight = FontWeight.Bold,
-            modifier = Modifier.padding(bottom = 24.dp)
-        )
+        // Cabecera igual a las otras pantallas
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.SpaceBetween,
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Text(
+                text = "Configuración",
+                style = MaterialTheme.typography.headlineMedium,
+                fontWeight = FontWeight.Bold,
+                color = MaterialTheme.colorScheme.primary
+            )
+        }
+
+        Spacer(modifier = Modifier.height(24.dp))
 
         PreferenceCategory(title = "General") {
             PreferenceSwitchItem(
@@ -94,6 +91,92 @@ fun PreferencesScreen(
             )
         }
 
+        PreferenceCategory(title = "IA & Servidores") {
+            var tempOllamaHost by remember { mutableStateOf(uiState.ollamaHost) }
+            var tempRagHost by remember { mutableStateOf(uiState.ragHost) }
+
+            Column(modifier = Modifier.padding(8.dp)) {
+                // OLLAMA - Todo en una línea
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    OutlinedTextField(
+                        value = tempOllamaHost,
+                        onValueChange = { 
+                            tempOllamaHost = it
+                            viewModel.setOllamaHost(it)
+                        },
+                        label = { Text("Host Ollama") },
+                        modifier = Modifier.weight(1f),
+                        leadingIcon = { Icon(Icons.Default.Dns, contentDescription = null) },
+                        singleLine = true
+                    )
+                    Spacer(modifier = Modifier.width(4.dp))
+                    OutlinedTextField(
+                        value = "11434",
+                        onValueChange = {},
+                        label = { Text("Port") },
+                        modifier = Modifier.width(75.dp),
+                        enabled = false,
+                        singleLine = true,
+                        colors = OutlinedTextFieldDefaults.colors(
+                            disabledTextColor = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.6f),
+                            disabledBorderColor = MaterialTheme.colorScheme.outlineVariant,
+                            disabledLabelColor = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.6f)
+                        )
+                    )
+                    IconButton(onClick = { viewModel.testOllamaConnection() }) {
+                        ConnectionStatusIcon(uiState.ollamaStatus)
+                    }
+                }
+
+                Spacer(modifier = Modifier.height(12.dp))
+
+                // RAG - Todo en una línea
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    OutlinedTextField(
+                        value = tempRagHost,
+                        onValueChange = { 
+                            tempRagHost = it
+                            viewModel.setRagHost(it)
+                        },
+                        label = { Text("Host RAG") },
+                        modifier = Modifier.weight(1f),
+                        leadingIcon = { Icon(Icons.Default.Storage, contentDescription = null) },
+                        singleLine = true
+                    )
+                    Spacer(modifier = Modifier.width(4.dp))
+                    OutlinedTextField(
+                        value = "8000",
+                        onValueChange = {},
+                        label = { Text("Port") },
+                        modifier = Modifier.width(75.dp),
+                        enabled = false,
+                        singleLine = true,
+                        colors = OutlinedTextFieldDefaults.colors(
+                            disabledTextColor = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.6f),
+                            disabledBorderColor = MaterialTheme.colorScheme.outlineVariant,
+                            disabledLabelColor = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.6f)
+                        )
+                    )
+                    IconButton(onClick = { viewModel.testRagConnection() }) {
+                        ConnectionStatusIcon(uiState.ragStatus)
+                    }
+                }
+            }
+            
+            Text(
+                text = "Pulsa el icono para probar la conexión.",
+                style = MaterialTheme.typography.bodySmall,
+                modifier = Modifier.padding(horizontal = 16.dp, vertical = 4.dp),
+                color = MaterialTheme.colorScheme.onSurfaceVariant
+            )
+        }
+
         PreferenceCategory(title = "Cuenta") {
             PreferenceItem(
                 title = "Perfil de Usuario",
@@ -117,6 +200,49 @@ fun PreferencesScreen(
             style = MaterialTheme.typography.labelSmall,
             modifier = Modifier.align(Alignment.CenterHorizontally),
             color = MaterialTheme.colorScheme.onSurfaceVariant
+        )
+    }
+
+    if (showThemeDialog) {
+        ThemeSelectionDialog(
+            currentMode = uiState.darkMode,
+            onDismiss = { showThemeDialog = false },
+            onSelect = {
+                viewModel.setDarkMode(it)
+                showThemeDialog = false
+            }
+        )
+    }
+}
+
+@Composable
+fun ConnectionStatusIcon(status: ConnectionStatus) {
+    val color = when (status) {
+        ConnectionStatus.ONLINE -> MaterialTheme.colorScheme.primary
+        ConnectionStatus.OFFLINE -> MaterialTheme.colorScheme.error
+        ConnectionStatus.CHECKING -> MaterialTheme.colorScheme.secondary
+        ConnectionStatus.UNKNOWN -> MaterialTheme.colorScheme.onSurfaceVariant
+    }
+    
+    val icon = when (status) {
+        ConnectionStatus.ONLINE -> Icons.Default.CheckCircle
+        ConnectionStatus.OFFLINE -> Icons.Default.Error
+        ConnectionStatus.CHECKING -> Icons.Default.Sync
+        ConnectionStatus.UNKNOWN -> Icons.Default.PlayCircle
+    }
+
+    if (status == ConnectionStatus.CHECKING) {
+        CircularProgressIndicator(
+            modifier = Modifier.size(24.dp),
+            strokeWidth = 2.dp,
+            color = color
+        )
+    } else {
+        Icon(
+            imageVector = icon,
+            contentDescription = status.name,
+            tint = color,
+            modifier = Modifier.size(28.dp)
         )
     }
 }

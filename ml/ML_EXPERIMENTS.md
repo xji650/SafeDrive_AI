@@ -149,3 +149,49 @@ Velocidad >= 15 km/h   AND   Peak_G >= 3.5 G   AND   Audio >= 85 dB
 ```
 
 Si estas tres condiciones físicas de activación no ocurren a la vez (por ejemplo, si el móvil recibe un golpe seco de 10G al caerse en la mesa de noche pero la velocidad GPS es de 0 km/h y no hay estruendo acústico masivo), el evento se descarta instantáneamente en milisegundos por código heurístico estricto, logrando un equilibrio perfecto entre la robustez científica de la Inteligencia Artificial y la eficiencia pragmática del software móvil.
+
+---
+
+# 9. Asistente SafeDrive AI: Implementación de RAG (Retrieval-Augmented Generation)
+
+Además de la detección de impactos, el sistema incorpora un **Asistente de IA Generativa** diseñado para resolver dudas sobre seguridad vial, protocolos de emergencia y manuales técnicos del vehículo, minimizando las alucinaciones del modelo mediante la técnica de **RAG**.
+
+## 9.1 Descripción del Problema y Abordaje
+Los modelos de lenguaje (LLM) genéricos como Llama 3 suelen dar respuestas generales, pero carecen de conocimientos específicos sobre normativas locales actualizadas (ej. Ley de Tráfico española) o procedimientos técnicos de SafeDrive AI. 
+*   **Problema:** Alucinaciones y falta de contexto local.
+*   **Abordaje:** Implementación de una arquitectura de **Recuperación Aumentada (RAG)**. Antes de responder, el sistema busca fragmentos de documentos oficiales en una base de datos vectorial y los inyecta en el "prompt" del modelo como conocimiento base.
+
+## 9.2 Datos Utilizados
+Para alimentar el cerebro del asistente se han procesado y vectorizado las siguientes fuentes:
+*   **Normativa DGT/BOE:** Fragmentos de la Ley sobre Tráfico y Seguridad Vial.
+*   **Manuales de Seguridad:** Protocolos PAS (Proteger, Avisar, Socorrer).
+*   **Parte y seguro:** Cómo redactar parte amistoso.
+
+## 9.3 Estructura del Sistema RAG (`ml/RAG/`)
+La arquitectura sigue una organización modular para facilitar el despliegue en servidores locales o remotos:
+*   `/chroma_db/`: Almacén vectorial persistente que contiene los *embeddings* de los documentos.
+*   `/data/`: Documentos originales en formato PDF/Texto.
+*   `/scripts/main.py`: Servidor API basado en **FastAPI** que gestiona la búsqueda semántica.
+*   `/scripts/06_rag_safedrive_text.ipynb`: Notebook de ingestión, partición (*chunking*) y vectorización.
+
+## 9.4 Tecnologías Utilizadas
+*   **Orquestación:** LangChain.
+*   **Base de Datos Vectorial:** ChromaDB (Persistente).
+*   **Embeddings:** `nomic-embed-text` (vía Ollama).
+*   **Inferencia LLM:** qwen2.5:7b + gemma2.5 (visor), qwen2.5:7b + qwen2.5vl (visor), qwen2.5:7b operando en servidores locales.
+*   **Backend:** FastAPI con soporte para flujos asíncronos.
+
+## 9.5 Experimentación y Comparativa
+Se realizaron pruebas comparativas para determinar la configuración óptima de recuperación de contexto:
+
+| Configuración       | Modelo                            | K (Chunks)  | Resultado / Calidad                                                             |
+|:--------------------|:----------------------------------|:-----------:|:--------------------------------------------------------------------------------|
+| **Básica**          | Llama 3                           | 0 (Sin RAG) | Respuestas genéricas, a veces ignora leyes locales.                             |
+| **RAG-Mulltimodal** | qwen2.5:7b + gemma2.5 / qwen2.5vl |      3      | Muy lento escaneo de imagenes, y el uso de gemma no renta.                      |
+| **RAG-estandard**   | qwen2.5:7b                        |      3      | **ÓPTIMO:** Respuestas precisas basadas en el BOE.                              |
+| **RAG-Extendido**   | qwen2.5:7b                       |      3      | **ÓPTIMO:** Respuestas precisas basadas en el BOE + actualizaciones baliza v16. |
+
+## 9.6 Resultados y Conclusiones del Asistente
+1.  **Precisión Documental:** El uso de RAG aumentó la precisión de las respuestas.
+2.  **Eficiencia:** El uso de `nomic-embed-text` permite realizar búsquedas semánticas en un tiempo razonable, lo que garantiza una experiencia de chat fluida.
+3.  **Seguridad:** Al inyectar el contexto, se reduce drásticamente la probabilidad de que la IA recomiende acciones peligrosas o fuera de protocolo durante una emergencia.

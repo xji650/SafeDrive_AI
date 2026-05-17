@@ -48,6 +48,7 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.material.icons.filled.Report
 import androidx.compose.material.icons.filled.Delete
+import androidx.compose.material.icons.filled.Chat
 import androidx.compose.material.icons.filled.ChevronRight
 import androidx.compose.foundation.clickable
 import androidx.compose.ui.platform.LocalContext
@@ -63,6 +64,8 @@ import com.example.safedriveai.ui.edr.EdrScreen
 import com.example.safedriveai.ui.edr.EdrViewModel
 import com.example.safedriveai.domain.model.AppDestinations
 import com.example.safedriveai.domain.model.NavigationItem
+import com.example.safedriveai.ui.chat.ChatScreen
+import com.example.safedriveai.ui.chat.ChatViewModel
 import com.example.safedriveai.ui.dashboard.DashboardViewModel
 import com.example.safedriveai.ui.diagnostic.DiagnosticScreen
 import com.example.safedriveai.ui.diagnostic.DiagnosticViewModel
@@ -82,6 +85,23 @@ fun SafeDriveAIApp(navController: NavController) {
     val edrViewModel: EdrViewModel = hiltViewModel()
     val dashboardViewModel: DashboardViewModel = hiltViewModel()
     val diagnosticViewModel: DiagnosticViewModel = hiltViewModel()
+    val preferencesViewModel: PreferencesViewModel = hiltViewModel()
+
+    val prefState by preferencesViewModel.uiState.collectAsState()
+    
+    // Sincronizar URLs del OllamaClient con las preferencias de forma segura
+    LaunchedEffect(prefState.ollamaHost, prefState.ragHost) {
+        fun formatUrl(host: String, defaultPort: Int): String {
+            val cleanHost = host.removePrefix("http://").removePrefix("https://").removeSuffix("/")
+            val finalHost = if (cleanHost.contains(":")) cleanHost else "$cleanHost:$defaultPort"
+            return "http://$finalHost"
+        }
+
+        val ollamaUrl = formatUrl(prefState.ollamaHost, 11434)
+        val ragUrl = formatUrl(prefState.ragHost, 8000)
+        
+        com.example.safedriveai.ml.OllamaClient.updateUrls(ollamaUrl, ragUrl)
+    }
 
     // --- 2. AUTOMATIZACIÓN INTELIGENTE ---
     LaunchedEffect(isFullScreen) {
@@ -105,6 +125,7 @@ fun SafeDriveAIApp(navController: NavController) {
     val navItems = listOf(
         NavigationItem(AppDestinations.DASHBOARD, Icons.Default.Home, "Dashboard"),
         NavigationItem(AppDestinations.DIAGNOSTIC, Icons.Default.Build, "Diagnostic"),
+        NavigationItem(AppDestinations.CHAT, Icons.Default.Chat, "Asistente"),
         NavigationItem(AppDestinations.EDR, Icons.Default.Report, "EDR"),
         NavigationItem(AppDestinations.USER_PREFERENCE, Icons.Default.Person, "Prefs")
     )
@@ -173,9 +194,12 @@ fun SafeDriveAIApp(navController: NavController) {
                     isLandscape = currentRotation.isLandscape
                 )
                 AppDestinations.DIAGNOSTIC -> DiagnosticScreen(viewModel = diagnosticViewModel)
+                AppDestinations.CHAT -> {
+                    val chatViewModel: ChatViewModel = hiltViewModel()
+                    ChatScreen(viewModel = chatViewModel)
+                }
                 AppDestinations.EDR -> EdrScreen(viewModel = edrViewModel)
                 AppDestinations.USER_PREFERENCE -> {
-                    val preferencesViewModel: PreferencesViewModel = hiltViewModel()
                     PreferencesScreen(viewModel = preferencesViewModel)
                 }
                 AppDestinations.TRASH -> EdrScreen(

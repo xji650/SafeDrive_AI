@@ -2,13 +2,16 @@ package com.example.safedriveai.data.local
 
 import androidx.room.Database
 import androidx.room.RoomDatabase
+import com.example.safedriveai.data.local.dao.ChatDao
 import com.example.safedriveai.data.local.dao.IncidentDao
+import com.example.safedriveai.data.local.entity.ChatEntity
 import com.example.safedriveai.data.local.entity.IncidentEntity
 
 // 1. Le decimos qué "Fichas" (Entities) va a guardar y la versión de la base de datos
-@Database(entities = [IncidentEntity::class], version = 3, exportSchema = false)
+@Database(entities = [IncidentEntity::class, ChatEntity::class], version = 4, exportSchema = false)
 abstract class AppDatabase : RoomDatabase() {
 
     // 2. Le decimos qué "Libro de órdenes" (DAO) va a usar
     abstract fun incidentDao(): IncidentDao
+    abstract fun chatDao(): ChatDao
 }

@@ -35,6 +35,8 @@ Esto ha resultado en un código menos modular y más difícil de mantener, aunqu
 
 4.  **Caja Negra EDR:** Registro de eventos con detalles de telemetría pre y post-impacto, exportable en formato CSV.
 
+5.  **Asistente SafeDrive AI (IA & RAG):** Chat interactivo que permite consultar manuales técnicos y recibir consejos de seguridad en tiempo real mediante modelos LLM y base de datos vectorial (ChromaDB).
+
 ## 4. Instrucciones para Ejecutar la App
 
 1.  **Requisitos:** Android Studio Ladybug, dispositivo Android 10+ y archivo del modelo en `app/src/main/assets/safedrive_v4.tflite`.
@@ -59,11 +61,12 @@ Esto ha resultado en un código menos modular y más difícil de mantener, aunqu
 │   │   │   ├── entity/    # Modelos de datos (Room)
 │   │   │   └── mapper/    # Conversión de datos (Room)
 │   │   ├── remote/        # Firebase Firestore y Storage
-│   │   └── repository/    # IncidentRepository (orquestador de datos)
+│   │   └── repository/    # Implementaciones (IncidentRepositoryImpl, AiRepositoryImpl)
 │   │
 │   ├── di/         # Inyección de dependencias
 │   ├── domain/     # Dominio del sistema
 │   │   ├── model/      # Modelos de negocio (Accidente, SensorData)
+│   │   ├── repository/ # Interfaces de Repositorio (AiRepository, IncidentRepository)
 │   │   ├── usecase/    # Casos de uso (IncidentDetectorUC, SyncDataUC)
 │   │   └── utils/      # Utilidades (Thresholds, Constants)
 │   ├── sensors/    # SensorDataManager, ActivityReceiver

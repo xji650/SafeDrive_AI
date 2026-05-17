@@ -7,9 +7,12 @@ import android.content.Context
 import androidx.room.Room
 import com.example.safedriveai.data.local.AppDatabase
 import com.example.safedriveai.data.local.BlackBoxManager
+import com.example.safedriveai.data.local.dao.ChatDao
 import com.example.safedriveai.data.local.dao.IncidentDao
 import com.example.safedriveai.data.remote.IncidentRemoteData
+import com.example.safedriveai.data.repository.AiRepositoryImpl
 import com.example.safedriveai.data.repository.IncidentRepositoryImpl
+import com.example.safedriveai.domain.repository.AiRepository
 import com.example.safedriveai.domain.repository.IncidentRepository
 import com.example.safedriveai.ml.IncidentClassifier
 import com.google.firebase.firestore.FirebaseFirestore
@@ -52,6 +55,11 @@ class AppModule {
         return db.incidentDao()
     }
 
+    @Provides
+    fun provideChatDao(db: AppDatabase): ChatDao {
+        return db.chatDao()
+    }
+
     // 4. EL CONTRATO (Unimos la Interfaz con la Implementación)
     @Provides
     @Singleton
@@ -61,6 +69,12 @@ class AppModule {
         blackBoxManager: BlackBoxManager
     ): IncidentRepository {
         return IncidentRepositoryImpl(dao, remoteDataSource, blackBoxManager)
+    }
+
+    @Provides
+    @Singleton
+    fun provideAiRepository(): AiRepository {
+        return AiRepositoryImpl()
     }
 
     // 5. INTELIGENCIA ARTIFICIAL
