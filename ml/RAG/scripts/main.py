@@ -13,7 +13,7 @@ if sys.platform == "win32":
     sys.stdout.reconfigure(errors="replace")
     sys.stderr.reconfigure(errors="replace")
 
-app = FastAPI(title="Servidor RAG - MLFruits")
+app = FastAPI(title="Servidor RAG - SafeDrive AI")
 
 DIR_DEL_SCRIPT = os.path.dirname(os.path.abspath(__file__))
 
